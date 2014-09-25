@@ -1,25 +1,38 @@
-#!/opt/local/bin/python
+#!/usr/bin/python3
+#/opt/local/bin/python
 ########################################
 # x0rion Feb 2014
 # SomaFM, Di.FM, WCPE (TheClassicalStation.org) terminal client
-# v0.1.2 7Aug2014 Added favs
-# v0.1.1 6Mar2014 Added Di.FM
+# v0.1.3 25Sep2014 Added proxy support
+# v0.1.2  7Aug2014 Added favs
+# v0.1.1  6Mar2014 Added Di.FM
 #
 # Latest version can be found at http://mason.gmu.edu/~rfarley3/radio
 #
 # First version based on: https://gist.github.com/roamingryan/2343819
-# Significantly modified par moi
+# Significantly modified
 # Coded for Python3
+#    macports makes this easy, but otherwise you will need to download the binary or source and compile (requires Xcode tools)
+#    be sure to change shebang to the correct path:
+#    e.g. #!/usr/local/bin/python3 OR ln -s /usr/local/bin/python3 /usr/bin/python3 and then #!/usr/bin/python3
+#    if you used macports, then it's in /opt/local/bin/python
+# Designed to use mpg123, but you can use any player that doesn't buffer stdout 
+#    if you use macports, then port install mpg123
+#    for osx you can just download latest or compile from source (requires Xcode tools)
+#    tested with version 1.20.1 from source
+# Don't miss out on the pretty
+#    install pyfiglet for ASCII art Banners
+#    install pillow for ASCII art Station ID Cover Art
 #
 # To use:
-#   verify you have mpg123, else change cmd to your fav player <- needs to not buffer output
 #   run ./radio or ./radio -h to see all the argument options
 #   select station at prompt, by number in left column
 #   enjoy
-USAGE = """Usage %s [-h|--help|--soma|--difm]
+USAGE = """Usage %s [-h|--help|-s|--soma|-d|--difm] [--proxy <url>]
 \t-h or --help\tThis help message
-\t--soma\t\tRun in SomaFM mode
-\t--difm\t\tRun in Di.FM mode
+\t-s or --soma\tRun in SomaFM mode
+\t-d or --difm\tRun in Di.FM mode
+\t-x or --proxy\tSet the proxy server
 
 Python script for direct listening to online music streams.
 Built-in compatibility with SomaFM and Di.FM.
@@ -122,7 +135,10 @@ import sys
 import textwrap
 import time
 import datetime
-    
+
+PROXY = "" # no proxy needed    
+PROXY = "gatekeeper.mitre.org" # set proxy to use
+
 # CSV file format
 # <stream URL>,<stream name>,<stream_img_url>
 SOMA_CHAN_FILENAME = ".somachannels.csv"
@@ -586,7 +602,11 @@ def playStation (url, prefix, show_deets=1):
     # mpg123 command line mp3 stream player, does unbuffered output, so the subprocess...readline snip works
     # -C allows keyboard presses to send commands: space is pause/resume, q is quit, +/- control volume
     # -@ tells it to read (for stream/playlist info) filenames/URLs from within the file located at the next arg 
-    subp_cmd = ["mpg123", "-C", "-@", url]
+    subp_cmd = []
+    if PROXY != "":
+        subp_cmd = ["mpg123", "-p", PROXY, "-C", "-@", url]
+    else:
+        subp_cmd = ["mpg123", "-C", "-@", url]
     p = subprocess.Popen (subp_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     import re
     # "le='([^']*)';" -> Song title didn't parse (StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)
@@ -693,14 +713,25 @@ if __name__=="__main__":
     # handle command line args
     mode = "favs"
     chan_filename = FAVS_CHAN_FILENAME
-    for arg in sys.argv:
-        if arg == "-soma" or arg == "--soma" or arg == "soma":
+    import getopt
+    try: 
+        opts, args = getopt.getopt (sys.argv[1:], "hsdx:", ["help","soma","difm","proxy="])
+    except getoptGetoptError:
+        usage ()
+    for opt, arg in opts:
+        #print ("here")
+        if opt in ("-s", "--soma"):
             mode = "soma"
             chan_filename = SOMA_CHAN_FILENAME
-        if arg == "-difm" or arg == "--difm" or arg == "difm":
+        elif opt in ("-d", "--difm"):
             mode = "difm"
             chan_filename = DIFM_CHAN_FILENAME
-        elif arg == "-h" or arg == "--help":
+        elif opt in ("-x", "--proxy"):
+            PROXY = arg
+            #print ("Using proxy " + PROXY)
+        elif opt in ("-h", "--help"):
+            usage ()
+        else:
             usage ()
     
     # we want the home directory to find/store the channels file

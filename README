@@ -1,11 +1,5 @@
-#!/opt/local/bin/python
 ########################################
-# x0rion Feb 2014
 # SomaFM, Di.FM, WCPE (TheClassicalStation.org) terminal client
-# v0.1.2 7Aug2014 Added favs
-# v0.1.1 6Mar2014 Added Di.FM
-#
-# Latest version can be found at http://mason.gmu.edu/~rfarley3/radio
 #
 # First version based on: https://gist.github.com/roamingryan/2343819
 # Significantly modified par moi
