@@ -137,6 +137,8 @@ import datetime
 PROXY = "" # no proxy needed    
 PROXY = "gatekeeper.mitre.org" # set proxy to use
 
+VOL = "11000" # volume 0 .. 32k
+
 # CSV file format
 # <stream URL>,<stream name>,<stream_img_url>
 SOMA_CHAN_FILENAME = ".somachannels.csv"
@@ -602,9 +604,9 @@ def playStation (url, prefix, show_deets=1):
     # -@ tells it to read (for stream/playlist info) filenames/URLs from within the file located at the next arg 
     subp_cmd = []
     if PROXY != "":
-        subp_cmd = ["mpg123", "-p", PROXY, "-C", "-@", url]
+        subp_cmd = ["mpg123", "-f", VOL, "-p", PROXY, "-C", "-@", url]
     else:
-        subp_cmd = ["mpg123", "-C", "-@", url]
+        subp_cmd = ["mpg123", "-f", VOL, "-C", "-@", url]
     p = subprocess.Popen (subp_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     import re
     # "le='([^']*)';" -> Song title didn't parse (StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)
