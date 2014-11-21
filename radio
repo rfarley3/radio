@@ -134,8 +134,8 @@ import textwrap
 import time
 import datetime
 
+BANNER = "~=radio tuner=~"
 PROXY = "" # no proxy needed    
-PROXY = "gatekeeper.mitre.org" # set proxy to use
 
 VOL = "11000" # volume 0 .. 32k
 
@@ -621,12 +621,13 @@ def playStation (url, prefix, show_deets=1):
         out = out.strip ()
         if show_deets and not has_deeted and out[0:8] == "ICY-NAME":
             station_deets = out[10:]
-            #print (">>> " +  station_deets)
-            (term_w, term_h) = resetDimensions ()
-            lines = textwrap.wrap (station_deets, term_w - len (prefix) )
-            print (prefix + lines[0])
-            for line in lines[1:]:
-                print (' ' * len (prefix) + line)
+            if station_deets[0:3] != "Def": # bc it's kinda poser having so much 'defcon' all over your screen
+                #print (">>> " +  station_deets)
+                (term_w, term_h) = resetDimensions ()
+                lines = textwrap.wrap (station_deets, term_w - len (prefix) )
+                print (prefix + lines[0])
+                for line in lines[1:]:
+                    print (' ' * len (prefix) + line)
             has_deeted = True
         elif out[0:8] == "ICY-META":
             out = out[10:]
@@ -709,6 +710,7 @@ if __name__=="__main__":
             print ("Error: import")
             sys.exit (1)
             
+    sys.stdout.write ("\x1b]0;" + BANNER + "\x07")
     #######
     # handle command line args
     mode = "favs"
@@ -795,6 +797,7 @@ if __name__=="__main__":
                 chan_num = chan_num.lower ()
                 ctrl_char = chan_num[0]
                 if (ctrl_char == 'q' or ctrl_char == 'e'):
+                    sys.stdout.write ("\x1b]0;" + "\x07")
                     sys.exit (0)
                 # they type in some variant of either difm or somafm or favs
                 if ctrl_char == mode[0]:
