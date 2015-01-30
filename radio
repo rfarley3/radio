@@ -1,5 +1,4 @@
-#!/usr/bin/python3
-#/opt/local/bin/python
+#!/usr/bin/env python3
 ########################################
 # x0rion Feb 2014
 # SomaFM, Di.FM, WCPE (TheClassicalStation.org) terminal client
@@ -14,7 +13,7 @@
 #    be sure to change shebang to the correct path:
 #    e.g. #!/usr/local/bin/python3 OR ln -s /usr/local/bin/python3 /usr/bin/python3 and then #!/usr/bin/python3
 #    if you used macports, then it's in /opt/local/bin/python
-# Designed to use mpg123, but you can use any player that doesn't buffer stdout 
+# Designed to use mpg123, but you can use any player that doesn't buffer stdout
 #    if you use macports, then port install mpg123
 #    for osx you can just download latest or compile from source (requires Xcode tools)
 #    tested with version 1.20.1 from source
@@ -47,44 +46,43 @@ And let's not forget the pretty ASCII art...
 #      perhaps get direct links for Soma
 #   ability to CRUD a favorites playlist
 #
-##### Dependencies
+# #### Dependencies
 # For scraping channel links from soma's website, req beautifulsoup4
 # For ascii banners, req pyfiglet; e.g.:
 """
- _______                      _______ ___ ___  _______                        
+ _______                      _______ ___ ___  _______
 |   _   .-----.--------.---.-|   _   |   Y   ||       .--.--.-----.-----.----.
 |   1___|  _  |        |  _  |.  1___|.      ||.|   | |  |  |     |  -__|   _|
-|____   |_____|__|__|__|___._|.  __) |. \_/  |`-|.  |-|_____|__|__|_____|__|  
-|:  1   |                    |:  |   |:  |   |  |:  |                         
-|::.. . |                    |::.|   |::.|:. |  |::.|                         
-`-------'                    `---'   `--- ---'  `---'                         
-  ______                   _______ _______    _______                      
- / _____)                 (_______|_______)  (_______)                     
-( (____   ___  ____  _____ _____   _  _  _       _ _   _ ____  _____  ____ 
+|____   |_____|__|__|__|___._|.  __) |. \_/  |`-|.  |-|_____|__|__|_____|__|
+|:  1   |                    |:  |   |:  |   |  |:  |
+|::.. . |                    |::.|   |::.|:. |  |::.|
+`-------'                    `---'   `--- ---'  `---'
+  ______                   _______ _______    _______
+ / _____)                 (_______|_______)  (_______)
+( (____   ___  ____  _____ _____   _  _  _       _ _   _ ____  _____  ____
  \____ \ / _ \|    \(____ |  ___) | ||_|| |     | | | | |  _ \| ___ |/ ___)
- _____) ) |_| | | | / ___ | |     | |   | |     | | |_| | | | | ____| |    
-(______/ \___/|_|_|_\_____|_|     |_|   |_|     |_|____/|_| |_|_____)_|    
-                                                                           
- _______                                 _______         __           __ 
+ _____) ) |_| | | | / ___ | |     | |   | |     | | |_| | | | | ____| |
+(______/ \___/|_|_|_\_____|_|     |_|   |_|     |_|____/|_| |_|_____)_|
+
+ _______                                 _______         __           __
 |     __|.----.-----.-----.--.--.-----. |     __|.---.-.|  |.---.-.--|  |
 |    |  ||   _|  _  |  _  |  |  |  -__| |__     ||  _  ||  ||  _  |  _  |
 |_______||__| |_____|_____|\___/|_____| |_______||___._||__||___._|_____|
-                                                                         
 
 >>> Groove Salad: a nicely chilled plate of ambient beats and grooves. [SomaFM]
 >>> Minot - The Cycle Of Venus
-8 8888      8 8888      88    d888888o.   8 8888        8 
-8 8888      8 8888      88  .`8888:' `88. 8 8888        8 
-8 8888      8 8888      88  8.`8888.   Y8 8 8888        8 
-8 8888      8 8888      88  `8.`8888.     8 8888        8 
-8 8888      8 8888      88   `8.`8888.    8 8888        8 
-8 8888      8 8888      88    `8.`8888.   8 8888        8 
-8 8888      8 8888      88     `8.`8888.  8 8888888888888 
-8 8888      ` 8888     ,8P 8b   `8.`8888. 8 8888        8 
-8 8888        8888   ,d8P  `8b.  ;8.`8888 8 8888        8 
-8 888888888888 `Y88888P'    `Y8888P ,88P' 8 8888        8 
+8 8888      8 8888      88    d888888o.   8 8888        8
+8 8888      8 8888      88  .`8888:' `88. 8 8888        8
+8 8888      8 8888      88  8.`8888.   Y8 8 8888        8
+8 8888      8 8888      88  `8.`8888.     8 8888        8
+8 8888      8 8888      88   `8.`8888.    8 8888        8
+8 8888      8 8888      88    `8.`8888.   8 8888        8
+8 8888      8 8888      88     `8.`8888.  8 8888888888888
+8 8888      ` 8888     ,8P 8b   `8.`8888. 8 8888        8
+8 8888        8888   ,d8P  `8b.  ;8.`8888 8 8888        8
+8 888888888888 `Y88888P'    `Y8888P ,88P' 8 8888        8
 
-Press enter if you like banner, else any char then enter 
+Press enter if you like banner, else any char then enter
 >>> Lush: Mostly female vocals with an electronic influence. [SomaFM]
 >>> Miaow - Tempered Song
 """
@@ -114,16 +112,16 @@ M([ K --------------(~([]-----------+M*K]   *==+  M  ]-*~~*++A-]-=[*))
 ------------+~](AM~K-------------W  -   -           ] [---------------
 --------------*( W ~[[)---------W                 - )W([[~-*----------
 --------------- WA W) =------- M      -M          *=-[~[([-*][]- --(=-
-----------+(-(--- *[= ++------K        (        ]M [----------------* 
+----------+(-(--- *[= ++------K        (        ]M [----------------*
 -------- M( *A+][KW)(M=[-[ (~)             (M  [  K-A[ ---------------
 ------WK K (-      -K(----(A](]=M(             - M -A(~A [~-----------
 ---- AA-A=+ -[K)-[+A( -----W     -))[  ([~](    A ----- -[+]][[~- -[+-
--~A K  -*--[K]---- [--------]          -([A))( -[)-----~=([AM(=M~)]W* 
+-~A K  -*--[K]---- [--------]          -([A))( -[)-----~=([AM(=M~)]W*
 ---A* W~ M+W--------[+M ----[ AW[              [--W  -*+(K=W--K[M[-([-
-      WM- A         +(- K  ) -+=- [MA-       W+    AMWWKA  [  WM])    
+      WM- A         +(- K  ) -+=- [MA-       W+    AMWWKA  [  WM])
 ----------       -     +--~- ~ +**~~~+--***-~-- * ~-- -----K(+W -[-]-+
 -+- +]])]))()()]-W)       -]- =  --+-      --*~ +- =---* ]])])))(]]) ]
-  (]])([)])[*   -    )[]--      ~ -- +--= ==+- =- =- *- )]))[=-       
+  (]])([)])[*   -    )[]--      ~ -- +--= ==+- =- =- *- )]))[=-
 ][]))(( -A             )[)+-     ~ -+= *--- -~ *=~=+ ~~ - K))[])((*~=-
   A]][[) --*-----=~++]]+(]]]+*[ *  - ~~--   --~*+* +=* ~~ -- -)])[([))
 """
@@ -132,12 +130,12 @@ import csv
 import sys
 import textwrap
 import time
-import datetime
+# import datetime
 
 BANNER = "~=radio tuner=~"
-PROXY = "" # no proxy needed    
+PROXY = ""  # no proxy needed
 
-VOL = "11000" # volume 0 .. 32k
+VOL = "11000"  # volume 0 .. 32k
 
 # CSV file format
 # <stream URL>,<stream name>,<stream_img_url>
@@ -145,7 +143,7 @@ SOMA_CHAN_FILENAME = ".somachannels.csv"
 CHAN_AGE_LIMIT = 7  # in days, maximum age of the channel file before rebuilding it
 DIFM_PARSE_URL = "http://pub5.di.fm/"
 DIFM_CHAN_FILENAME = ".difmchannels.csv"
-FAVS_CHAN_FILENAME = ".favchannels.csv" # manually updated
+FAVS_CHAN_FILENAME = ".favchannels.csv"  # manually updated
 # Here is the default/recommended .favchannels.csv:
 FAVS_DEFAULT = """
 http://www.ibiblio.org/wcpe/wcpe.pls,WCPE Classical,"TheClassicalStation.org from Wake Forest, NC",http://theclassicalstation.org/images/wcpe_footer.jpg
@@ -169,7 +167,7 @@ http://pub5.di.fm/di_house,House,Silky deep house music direct from NYC,
 """
 
 # page to parse for channel urls, names, and descriptions
-SOMA_PARSE_URL="http://somafm.com"
+SOMA_PARSE_URL = "http://somafm.com"
 ####
 # format of stream url
 # original py script template: http://ice.somafm.com/<NAME>
@@ -182,31 +180,32 @@ SOMA_PARSE_URL="http://somafm.com"
 # from other links on somafm site:
 #   http://somafm.com/play/<NAME>
 #   but this doesn't load in mpg123 at all
-# mpg123 can handle the "direct links", but to parse for these would require requesting each channel's directstreamlinks.html 
-SOMA_STREAM_BASE_URL="http://ice.somafm.com/"
-SOMA_STREAM_END_URL  = "" 
+# mpg123 can handle the "direct links", but to parse for these would require requesting each channel's directstreamlinks.html
+SOMA_STREAM_BASE_URL = "http://ice.somafm.com/"
+SOMA_STREAM_END_URL  = ""
 
 # If true, then station will only show most recent song title
 COMPACT_TITLES = True
 """
-  ###       ###              ###                 ###     ####            
- ## #        ##               ##                 #      ##  #            
- ##    # ##  ###   # ## ## #  ###   ###    ##  ####    ##      ##   ###  
-  ##  ## ## ## ## ## ##  ### ## ## ###    ## #  ##     ## ### ## #   ### 
-# ##  ## #  ## #  ## #  ##   ## #    ##   #  #  ##     ## ##  #  # ## #  
-###    ####  ##    #### ##    ##   ###     ##   ##      ## #   ##   #### 
-                                                #                        
-                                               #                         
+  ###       ###              ###                 ###     ####
+ ## #        ##               ##                 #      ##  #
+ ##    # ##  ###   # ## ## #  ###   ###    ##  ####    ##      ##   ###
+  ##  ## ## ## ## ## ##  ### ## ## ###    ## #  ##     ## ### ## #   ###
+# ##  ## #  ## #  ## #  ##   ## #    ##   #  #  ##     ## ##  #  # ## #
+###    ####  ##    #### ##    ##   ###     ##   ##      ## #   ##   ####
+                                                #
+                                               #
 
 >>> Suburbs of Goa: Desi-influenced Asian world beats. [SomaFM]
->>> Karsh Kale - Satellite 
+>>> Karsh Kale - Satellite
 """
 # If false, then station will show history
 """
 >>> Suburbs of Goa: Desi-influenced Asian world beats. [SomaFM]
 >>> David Starfire - Sitarfire
->>> Karsh Kale - Satellite 
+>>> Karsh Kale - Satellite
 """
+
 
 class colors:
     COLORS = {
@@ -217,41 +216,49 @@ class colors:
         'red'   : '\033[91m',
         'endc'  : '\033[0m',
     }
-    def __init__ (self, color, out=sys.stdout):
+
+
+    def __init__(self, color, out=sys.stdout):
         self.color = color
         self.out = out
- 
-    def __enter__ (self):
-        self.out.write (self.COLORS[self.color])
- 
-    def __exit__ (self, type, value, traceback):
-        self.out.write (self.COLORS['endc'])
-    
-def buildFavsChannelFile (outfile):
-    print ("Building new channels file from default favs...")
-    csv_chan_file = open (outfile, 'w')
-    csv_chan_file.write (FAVS_DEFAULT);
-    csv_chan_file.close ()
+
+
+    def __enter__(self):
+        self.out.write(self.COLORS[self.color])
+
+
+    def __exit__(self, type, value, traceback):
+        self.out.write(self.COLORS['endc'])
+
+
+
+
+def buildFavsChannelFile(outfile):
+    print("Building new channels file from default favs...")
+    csv_chan_file = open(outfile, 'w')
+    csv_chan_file.write(FAVS_DEFAULT)
+    csv_chan_file.close()
     return
 
-def buildSomaChannelFile (outfile):
+
+def buildSomaChannelFile(outfile):
     # Scrapes channels from somafm.com
     # original at https://gist.github.com/roamingryan/2343819
     # mod'ed by x0rion Feb 2014
     #   store name and desc seo; add img url
     #   handle specific bad streams
     from bs4 import BeautifulSoup
-    from urllib.request import urlopen 
-    page = urlopen (SOMA_PARSE_URL)
-    soup = BeautifulSoup (page)
-    chan_instances = soup.findAll ('li',{"class":"cbshort"})
+    from urllib.request import urlopen
+    page = urlopen(SOMA_PARSE_URL)
+    soup = BeautifulSoup(page)
+    chan_instances = soup.findAll('li', {"class": "cbshort"})
 
-    print ("Building new channels file from somafm.com...")
-    csv_chan_file = open (outfile, 'w', newline='') # per doc to avoid TypeError: 'str' does not support the buffer interface
-    chan_writer = csv.writer (csv_chan_file)
+    print("Building new channels file from somafm.com...")
+    csv_chan_file = open(outfile, 'w', newline='')  # per doc to avoid TypeError: 'str' does not support the buffer interface
+    chan_writer = csv.writer(csv_chan_file)
 
     for inst in chan_instances:
-        stream_url_short = inst.find ('a')['href'].replace ("/","")
+        stream_url_short = inst.find('a')['href'].replace("/", "")
         # for some reason, the following aren't at the expected URL
         # use: http://somafm.com/ + stream_url_short + /directstreamlinks.html and look under MP3 128kb for Direct Server: http://fqdn:port
         # consider doing this longer procedure for all channels
@@ -262,495 +269,495 @@ def buildSomaChannelFile (outfile):
             stream_url = "http://sfstream1.somafm.com:5100"
         else:
             stream_url  = SOMA_STREAM_BASE_URL + stream_url_short + SOMA_STREAM_END_URL
-        stream_name = inst.find ('a').find ('img')['alt'].split (":")[0]
-        stream_img  = SOMA_PARSE_URL + inst.find ('a').find ('img')['src']
-        stream_desc = inst.find ('p').string
+        stream_name = inst.find('a').find('img')['alt'].split(":")[0]
+        stream_img  = SOMA_PARSE_URL + inst.find('a').find('img')['src']
+        stream_desc = inst.find('p').string
         csv_row = [stream_url, stream_name, stream_desc, stream_img]
-        chan_writer.writerow (csv_row)
-        #os.system('cls' if os.name == 'nt' else 'clear') # so ascii art gets a page each
-        print ("  %s, %s, %s"%(stream_url, stream_name, stream_desc) )
-        printAsciiArt (stream_img, 80, 40)
+        chan_writer.writerow(csv_row)
+        # os.system('cls' if os.name == 'nt' else 'clear')  # so ascii art gets a page each
+        print("  %s, %s, %s" % (stream_url, stream_name, stream_desc))
+        printAsciiArt(stream_img, 80, 40)
     # add in some other manual ones
     # https://theclassicalstation.org/internet.shtml
     # http://audio-mp3.ibiblio.org:8000/wcpe.mp3 <- direct
-    chan_writer.writerow (['http://www.ibiblio.org/wcpe/wcpe.pls', 'WCPE Classical','TheClassicalStation.org 24/7 classical music from Wake Forest, NC','http://theclassicalstation.org/images/wcpe_footer.jpg'])
-    # goto http://www.wnrn.org/listen/ get link at "Load Stream" drop the final .m3u (or look at file at URL contents)
-    chan_writer.writerow (['http://broadcast.wnrn.org:8000/wnrn.mp3', 'WNRN Cville', 'Independent Radio', 'http://www.wnrn.org/wp-content/themes/WNRN/images/logo2.gif'])
-    csv_chan_file.close ()
+    chan_writer.writerow(['http://www.ibiblio.org/wcpe/wcpe.pls', 'WCPE Classical', 'TheClassicalStation.org 24/7 classical music from Wake Forest, NC', 'http://theclassicalstation.org/images/wcpe_footer.jpg'])
+    # goto http://www.wnrn.org/listen/ get link at "Load Stream" drop the final .m3u(or look at file at URL contents)
+    chan_writer.writerow(['http://broadcast.wnrn.org:8000/wnrn.mp3', 'WNRN Cville', 'Independent Radio', 'http://www.wnrn.org/wp-content/themes/WNRN/images/logo2.gif'])
+    csv_chan_file.close()
     return
 
 
-def buildDifmChannelFile (outfile):
+def buildDifmChannelFile(outfile):
     # old way to get the streams:
     #   di.fm urls are at http://pastebin.com/i95PnyxJ for the pls files, then pull one url out of pls to use
     #   http://listen.di.fm/public3
-    #   chan_writer.writerow (['http://pub8.di.fm:80/di_trance', 'di.fm Trance', 'Digitally Imported', 'http://api.audioaddict.com/v1/assets/image/befc1043f0a216128f8570d3664856f7.jpg?size=200x200&quality=90'])
-    #### better way:
-    from urllib.request import urlopen 
-    page = urlopen (DIFM_PARSE_URL)
-    page_str = bytes.decode (page.read () )
-    #page = bytes.decode (urlopen (DIFM_PARSE_URL).read () )
-    #mp += re.findall('<h3>Mount Point /(.*?)</h3>', page)
-    #mp = re.findall ('<h3>Mount Point /([^<]*)</h3>', page)
-    #mp = re.findall ('<h3>Mount Point /([^_]*_[^_]*)</h3>', page)
-    #st = re.findall('Stream Title:</td><td class="streamdata">(.*?)</td>', page)
-    #st = re.findall('Stream Title:</td><td class="streamdata">([^<]*)</td>', page)
-    #print (page_str[0:1000])
+    #   chan_writer.writerow(['http://pub8.di.fm:80/di_trance', 'di.fm Trance', 'Digitally Imported', 'http://api.audioaddict.com/v1/assets/image/befc1043f0a216128f8570d3664856f7.jpg?size=200x200&quality=90'])
+    # ### better way:
+    from urllib.request import urlopen
+    page = urlopen(DIFM_PARSE_URL)
+    page_str = bytes.decode(page.read())
+    # page = bytes.decode(urlopen(DIFM_PARSE_URL).read())
+    # mp += re.findall('<h3>Mount Point /(.*?)</h3>', page)
+    # mp = re.findall('<h3>Mount Point /([^<]*)</h3>', page)
+    # mp = re.findall('<h3>Mount Point /([^_]*_[^_]*)</h3>', page)
+    # st = re.findall('Stream Title:</td><td class="streamdata">(.*?)</td>', page)
+    # st = re.findall('Stream Title:</td><td class="streamdata">([^<]*)</td>', page)
+    # print(page_str[0:1000])
     import re
-    mp = re.findall ('<h3>Mount Point /([^_]*_[^_]*)</h3></td><td[^<]*<a[^<]*</a><a[^<]*</a></td></tr></table></div><table[^<]*><tr><td>Stream Title:</td><td class="streamdata">([^<]*)</td>', page_str)
-    #for x in mp:
-    #    print ("match: " + str (x) )
+    mp = re.findall('<h3>Mount Point /([^_]*_[^_]*)</h3></td><td[^<]*<a[^<]*</a><a[^<]*</a></td></tr></table></div><table[^<]*><tr><td>Stream Title:</td><td class="streamdata">([^<]*)</td>', page_str)
+    # for x in mp:
+    #    print("match: " + str(x))
 
     # no album/station images in this page
-    #imgs = re.findall ('<img src="([^"]*)"', page)
-    #for x in imgs:
-    #    print ("match: " + str (x) )
+    # imgs = re.findall('<img src="([^"]*)"', page)
+    # for x in imgs:
+    #    print("match: " + str(x))
 
-    print ("Building new channels file from Di.FM...")
-    csv_chan_file = open (outfile, 'w', newline='') # per doc to avoid TypeError: 'str' does not support the buffer interface
-    chan_writer = csv.writer (csv_chan_file)
-    
+    print("Building new channels file from Di.FM...")
+    csv_chan_file = open(outfile, 'w', newline='')  # per doc to avoid TypeError: 'str' does not support the buffer interface
+    chan_writer = csv.writer(csv_chan_file)
+
     chans = 0
-    for index, tup in enumerate (mp, start=1):
+    for index, tup in enumerate(mp, start=1):
         stream_url, stream_desc = tup
         stream_url = DIFM_PARSE_URL + stream_url
         stream_desc = re.sub(' DIGITALLY IMPORTED -', '', stream_desc)
         stream_desc = re.sub('&amp;', '&', stream_desc)
-        stream_name = stream_desc.split('-')[0].strip ()
-        stream_desc = stream_desc.split('-')[1].strip ()
+        stream_name = stream_desc.split('-')[0].strip()
+        stream_desc = stream_desc.split('-')[1].strip()
         csv_row = [stream_url, stream_name, stream_desc, ""]
-        chan_writer.writerow (csv_row)
-        print ("  %s, %s, %s"%(stream_url, stream_name, stream_desc) )
+        chan_writer.writerow(csv_row)
+        print("  %s, %s, %s" % (stream_url, stream_name, stream_desc))
         chans = chans + 1
-    csv_chan_file.close ()
+    csv_chan_file.close()
     return chans
 
 
-def randFont ():
+def randFont():
     # built-in font fetch doesn't work:
-    #fonts = f.getFonts ()
-    #for font in fonts:
-    #    print ("font: " + font)
-    #[cuchulain:~/Downloads/pyfiglet-master]$ ls -l pyfiglet/fonts/ | grep -v '^total' | grep -v py$ | sed -e "s/.*:33 /, '/" | sed  -e "s/_*.flf.*/'/" | paste -s -d" " -
+    # fonts = f.getFonts()
+    # for font in fonts:
+    #    print("font: " + font)
+    # [cuchulain:~/Downloads/pyfiglet-master]$ ls -l pyfiglet/fonts/ | grep -v '^total' | grep -v py$ | sed -e "s/.*:33 /, '/" | sed  -e "s/_*.flf.*/'/" | paste -s -d" " -
     """
-    fonts = ['1943' , '3-d' , '3x5' , '4x4_offr' , '5lineoblique' , '5x7' , '64f1' , '6x10' , '6x9' , 'a_zooloo' , 'acrobatic' , 'advenger' , 'alligator' , 'alligator2' , 'alphabet' , 'aquaplan' , 'ascii' , 'assalt_m' , 'asslt__m' , 'atc' , 'atc_gran' , 'avatar' , 'banner' , 'banner3-D' , 'banner3' , 'banner4' , 'barbwire' , 'basic' , 'battle_s' , 'battlesh' , 'baz__bil' , 'beer_pub' , 'bell' , 'big' , 'bigchief' , 'binary' , 'block' , 'brite' , 'briteb' , 'britebi' , 'britei' , 'broadway' , 'bubble' , 'bubble' , 'bubble_b' , 'bulbhead' , 'c1' , 'c2' , 'c_ascii' , 'c_consen' , 'calgphy2' , 'caligraphy' , 'catwalk' , 'caus_in' , 'char1' , 'char2' , 'char3' , 'char4' , 'charact1' , 'charact2' , 'charact3' , 'charact4' , 'charact5' , 'charact6' , 'characte' , 'charset' , 'chartr' , 'chartri' , 'chunky' , 'clb6x10' , 'clb8x10' , 'clb8x8' , 'cli8x8' , 'clr4x6' , 'clr5x10' , 'clr5x6' , 'clr5x8' , 'clr6x10' , 'clr6x6' , 'clr6x8' , 'clr7x10' , 'clr7x8' , 'clr8x10' , 'clr8x8' , 'coil_cop' , 'coinstak' , 'colossal' , 'com_sen' , 'computer' , 'contessa' , 'contrast' , 'convoy' , 'cosmic' , 'cosmike' , 'cour' , 'courb' , 'courbi' , 'couri' , 'crawford' , 'cricket' , 'cursive' , 'cyberlarge' , 'cybermedium' , 'cybersmall' , 'd_dragon' , 'dcs_bfmo' , 'decimal' , 'deep_str' , 'demo_1' , 'demo_2' , 'demo_m' , 'devilish' , 'diamond' , 'digital' , 'doh' , 'doom' , 'dotmatrix' , 'double' , 'drpepper' , 'druid' , 'dwhistled' , 'e__fist' , 'ebbs_1' , 'ebbs_2' , 'eca' , 'eftichess' , 'eftifont' , 'eftipiti' , 'eftirobot' , 'eftitalic' , 'eftiwall' , 'eftiwater' , 'epic' , 'etcrvs' , 'f15' , 'faces_of' , 'fair_mea' , 'fairligh' , 'fbr12' , 'fbr1' , 'fbr2' , 'fbr_stri' , 'fbr_tilt' , 'fender' , 'finalass' , 'fireing' , 'flyn_sh' , 'fourtops' , 'fp2' , 'fraktur' , 'funky_dr' , 'future_1' , 'future_2' , 'future_3' , 'future_4' , 'future_5' , 'future_6' , 'future_7' , 'future_8' , 'fuzzy' , 'gauntlet' , 'ghost_bo' , 'goofy' , 'gothic' , 'gothic' , 'graceful' , 'gradient' , 'graffiti' , 'grand_pr' , 'green_be' , 'hades' , 'heavy_me' , 'helv' , 'helvb' , 'helvbi' , 'helvi' , 'heroboti' , 'hex' , 'high_noo' , 'hills' , 'hollywood' , 'home_pak' , 'house_of' , 'hypa_bal' , 'hyper' , 'inc_raw' , 'invita' , 'isometric1' , 'isometric2' , 'isometric3' , 'isometric4' , 'italic' , 'italics' , 'ivrit' , 'jazmine' , 'jerusalem' , 'joust' , 'kban' , 'kgames_i' , 'kik_star' , 'krak_out' , 'larry3d' , 'lazy_jon' , 'lcd' , 'lean' , 'letter_w' , 'letters' , 'letterw3' , 'linux' , 'lockergnome' , 'mad_nurs' , 'madrid' , 'magic_ma' , 'marquee' , 'master_o' , 'maxfour' , 'mayhem_d' , 'mcg' , 'mig_ally' , 'mike' , 'mini' , 'mirror' , 'mnemonic' , 'modern' , 'morse' , 'moscow' , 'mshebrew210' , 'nancyj-fancy' , 'nancyj-underlined' , 'nancyj' , 'new_asci' , 'nfi1' , 'nipples' , 'notie_ca' , 'ntgreek' , 'nvscript' , 'o8' , 'octal' , 'odel_lak' , 'ogre' , 'ok_beer' , 'os2' , 'p_s_h_m' , 'p_skateb' , 'pacos_pe' , 'panther' , 'pawn_ins' , 'pawp' , 'peaks' , 'pebbles' , 'pepper' , 'phonix' , 'platoon2' , 'platoon' , 'pod' , 'poison' , 'puffy' , 'pyramid' , 'r2-d2' , 'rad' , 'rad_phan' , 'radical' , 'rainbow' , 'rally_s2' , 'rally_sp' , 'rastan' , 'raw_recu' , 'rci' , 'rectangles' , 'relief' , 'relief2' , 'rev' , 'ripper!' , 'road_rai' , 'rockbox' , 'rok' , 'roman' , 'roman' , 'rot13' , 'rounded' , 'rowancap' , 'rozzo' , 'runic' , 'runyc' , 'sans' , 'sansb' , 'sansbi' , 'sansi' , 'sblood' , 'sbook' , 'sbookb' , 'sbookbi' , 'sbooki' , 'script' , 'script' , 'serifcap' , 'shadow' , 'short' , 'skate_ro' , 'skateord' , 'skateroc' , 'sketch_s' , 'slant' , 'slide' , 'slscript' , 'sm' , 'small' , 'smisome1' , 'smkeyboard' , 'smscript' , 'smshadow' , 'smslant' , 'smtengwar' , 'speed' , 'stacey' , 'stampatello' , 'standard' , 'star_war' , 'starwars' , 'stealth' , 'stellar' , 'stencil1' , 'stencil2' , 'stop' , 'straight' , 'street_s' , 'subteran' , 'super_te' , 't__of_ap' , 'tanja' , 'tav1' , 'taxi' , 'tec1' , 'tec_7000' , 'tecrvs' , 'tengwar' , 'term' , 'thick' , 'thin' , 'threepoint' , 'ti_pan' , 'ticks' , 'ticksslant' , 'times' , 'timesofl' , 'tinker-toy' , 'tomahawk' , 'tombstone' , 'top_duck' , 'trashman' , 'trek' , 'triad_st' , 'tsalagi' , 'tsm' , 'tsn_base' , 'tty' , 'ttyb' , 'twin_cob' , 'twopoint' , 'type_set' , 'ucf_fan' , 'ugalympi' , 'unarmed' , 'univers' , 'usa' , 'usa_pq' , 'usaflag' , 'utopia' , 'utopiab' , 'utopiabi' , 'utopiai' , 'vortron' , 'war_of_w' , 'weird' , 'whimsy' , 'xbrite' , 'xbriteb' , 'xbritebi' , 'xbritei' , 'xchartr' , 'xchartri' , 'xcour' , 'xcourb' , 'xcourbi' , 'xcouri' , 'xhelv' , 'xhelvb' , 'xhelvbi' , 'xhelvi' , 'xsans' , 'xsansb' , 'xsansbi' , 'xsansi' , 'xsbook' , 'xsbookb' , 'xsbookbi' , 'xsbooki' , 'xtimes' , 'xtty' , 'xttyb' , 'yie-ar' , 'yie_ar_k' , 'z-pilot' , 'zig_zag']
-    nerdy_but_unpretty = [ 'hex' , 'octal' , 'binary' , 'rot13', 'morse' ]
+    fonts = ['1943', '3-d', '3x5', '4x4_offr', '5lineoblique', '5x7', '64f1', '6x10', '6x9', 'a_zooloo', 'acrobatic', 'advenger', 'alligator', 'alligator2', 'alphabet', 'aquaplan', 'ascii', 'assalt_m', 'asslt__m', 'atc', 'atc_gran', 'avatar', 'banner', 'banner3-D', 'banner3', 'banner4', 'barbwire', 'basic', 'battle_s', 'battlesh', 'baz__bil', 'beer_pub', 'bell', 'big', 'bigchief', 'binary', 'block', 'brite', 'briteb', 'britebi', 'britei', 'broadway', 'bubble', 'bubble', 'bubble_b', 'bulbhead', 'c1', 'c2', 'c_ascii', 'c_consen', 'calgphy2', 'caligraphy', 'catwalk', 'caus_in', 'char1', 'char2', 'char3', 'char4', 'charact1', 'charact2', 'charact3', 'charact4', 'charact5', 'charact6', 'characte', 'charset', 'chartr', 'chartri', 'chunky', 'clb6x10', 'clb8x10', 'clb8x8', 'cli8x8', 'clr4x6', 'clr5x10', 'clr5x6', 'clr5x8', 'clr6x10', 'clr6x6', 'clr6x8', 'clr7x10', 'clr7x8', 'clr8x10', 'clr8x8', 'coil_cop', 'coinstak', 'colossal', 'com_sen', 'computer', 'contessa', 'contrast', 'convoy', 'cosmic', 'cosmike', 'cour', 'courb', 'courbi', 'couri', 'crawford', 'cricket', 'cursive', 'cyberlarge', 'cybermedium', 'cybersmall', 'd_dragon', 'dcs_bfmo', 'decimal', 'deep_str', 'demo_1', 'demo_2', 'demo_m', 'devilish', 'diamond', 'digital', 'doh', 'doom', 'dotmatrix', 'double', 'drpepper', 'druid', 'dwhistled', 'e__fist', 'ebbs_1', 'ebbs_2', 'eca', 'eftichess', 'eftifont', 'eftipiti', 'eftirobot', 'eftitalic', 'eftiwall', 'eftiwater', 'epic', 'etcrvs', 'f15', 'faces_of', 'fair_mea', 'fairligh', 'fbr12', 'fbr1', 'fbr2', 'fbr_stri', 'fbr_tilt', 'fender', 'finalass', 'fireing', 'flyn_sh', 'fourtops', 'fp2', 'fraktur', 'funky_dr', 'future_1', 'future_2', 'future_3', 'future_4', 'future_5', 'future_6', 'future_7', 'future_8', 'fuzzy', 'gauntlet', 'ghost_bo', 'goofy', 'gothic', 'gothic', 'graceful', 'gradient', 'graffiti', 'grand_pr', 'green_be', 'hades', 'heavy_me', 'helv', 'helvb', 'helvbi', 'helvi', 'heroboti', 'hex', 'high_noo', 'hills', 'hollywood', 'home_pak', 'house_of', 'hypa_bal', 'hyper', 'inc_raw', 'invita', 'isometric1', 'isometric2', 'isometric3', 'isometric4', 'italic', 'italics', 'ivrit', 'jazmine', 'jerusalem', 'joust', 'kban', 'kgames_i', 'kik_star', 'krak_out', 'larry3d', 'lazy_jon', 'lcd', 'lean', 'letter_w', 'letters', 'letterw3', 'linux', 'lockergnome', 'mad_nurs', 'madrid', 'magic_ma', 'marquee', 'master_o', 'maxfour', 'mayhem_d', 'mcg', 'mig_ally', 'mike', 'mini', 'mirror', 'mnemonic', 'modern', 'morse', 'moscow', 'mshebrew210', 'nancyj-fancy', 'nancyj-underlined', 'nancyj', 'new_asci', 'nfi1', 'nipples', 'notie_ca', 'ntgreek', 'nvscript', 'o8', 'octal', 'odel_lak', 'ogre', 'ok_beer', 'os2', 'p_s_h_m', 'p_skateb', 'pacos_pe', 'panther', 'pawn_ins', 'pawp', 'peaks', 'pebbles', 'pepper', 'phonix', 'platoon2', 'platoon', 'pod', 'poison', 'puffy', 'pyramid', 'r2-d2', 'rad', 'rad_phan', 'radical', 'rainbow', 'rally_s2', 'rally_sp', 'rastan', 'raw_recu', 'rci', 'rectangles', 'relief', 'relief2', 'rev', 'ripper!', 'road_rai', 'rockbox', 'rok', 'roman', 'roman', 'rot13', 'rounded', 'rowancap', 'rozzo', 'runic', 'runyc', 'sans', 'sansb', 'sansbi', 'sansi', 'sblood', 'sbook', 'sbookb', 'sbookbi', 'sbooki', 'script', 'script', 'serifcap', 'shadow', 'short', 'skate_ro', 'skateord', 'skateroc', 'sketch_s', 'slant', 'slide', 'slscript', 'sm', 'small', 'smisome1', 'smkeyboard', 'smscript', 'smshadow', 'smslant', 'smtengwar', 'speed', 'stacey', 'stampatello', 'standard', 'star_war', 'starwars', 'stealth', 'stellar', 'stencil1', 'stencil2', 'stop', 'straight', 'street_s', 'subteran', 'super_te', 't__of_ap', 'tanja', 'tav1', 'taxi', 'tec1', 'tec_7000', 'tecrvs', 'tengwar', 'term', 'thick', 'thin', 'threepoint', 'ti_pan', 'ticks', 'ticksslant', 'times', 'timesofl', 'tinker-toy', 'tomahawk', 'tombstone', 'top_duck', 'trashman', 'trek', 'triad_st', 'tsalagi', 'tsm', 'tsn_base', 'tty', 'ttyb', 'twin_cob', 'twopoint', 'type_set', 'ucf_fan', 'ugalympi', 'unarmed', 'univers', 'usa', 'usa_pq', 'usaflag', 'utopia', 'utopiab', 'utopiabi', 'utopiai', 'vortron', 'war_of_w', 'weird', 'whimsy', 'xbrite', 'xbriteb', 'xbritebi', 'xbritei', 'xchartr', 'xchartri', 'xcour', 'xcourb', 'xcourbi', 'xcouri', 'xhelv', 'xhelvb', 'xhelvbi', 'xhelvi', 'xsans', 'xsansb', 'xsansbi', 'xsansi', 'xsbook', 'xsbookb', 'xsbookbi', 'xsbooki', 'xtimes', 'xtty', 'xttyb', 'yie-ar', 'yie_ar_k', 'z-pilot', 'zig_zag']
+    nerdy_but_unpretty = [ 'hex', 'octal', 'binary', 'rot13', 'morse' ]
     """
     # here are the fonts that I find the most interesting:
-    fonts = [ '3-d' , '3x5' , '5lineoblique' , 'a_zooloo' , 'acrobatic' , 'alligator' , 'alligator2' , 'alphabet' , 'avatar' , 'banner' , 'banner3-D' , 'banner4' , 'barbwire' , 'basic' , 'bell' , 'big' , 'bigchief' , 'block' , 'britebi' , 'broadway' , 'bubble' , 'bulbhead' , 'calgphy2' , 'caligraphy' , 'catwalk' , 'charact1' , 'charact4' , 'chartri' , 'chunky' , 'clb6x10' , 'coinstak' , 'colossal' , 'computer' , 'contessa' , 'contrast' , 'cosmic' , 'cosmike' , 'courbi' , 'crawford' , 'cricket' , 'cursive' , 'cyberlarge' , 'cybermedium' , 'cybersmall' , 'devilish' , 'diamond' , 'digital' , 'doh' , 'doom' , 'dotmatrix' , 'double' , 'drpepper' , 'dwhistled' , 'eftichess' , 'eftifont' , 'eftipiti' , 'eftirobot' , 'eftitalic' , 'eftiwall' , 'eftiwater' , 'epic' , 'fender' , 'fourtops' , 'fraktur' , 'funky_dr' , 'fuzzy' , 'goofy' , 'gothic' , 'graceful' , 'graffiti' , 'helvbi' , 'hollywood' , 'home_pak' , 'invita' , 'isometric1' , 'isometric2' , 'isometric3' , 'isometric4' , 'italic' , 'ivrit' , 'jazmine' , 'jerusalem' , 'kban' , 'larry3d' , 'lean' , 'letters' , 'linux' , 'lockergnome' , 'madrid' , 'marquee' , 'maxfour' , 'mike' , 'mini' , 'mirror' , 'moscow' , 'mshebrew210' , 'nancyj-fancy' , 'nancyj-underlined' , 'nancyj' , 'new_asci' , 'nipples' , 'ntgreek' , 'nvscript' , 'o8' , 'odel_lak' , 'ogre' , 'os2' , 'pawp' , 'peaks' , 'pebbles' , 'pepper' , 'poison' , 'puffy' , 'rectangles' , 'relief' , 'relief2' , 'rev' , 'roman', 'rounded' , 'rowancap' , 'rozzo' , 'runic' , 'runyc' , 'sansbi' , 'sblood' , 'sbookbi' , 'script' , 'serifcap' , 'shadow' , 'short' , 'sketch_s' , 'slant' , 'slide' , 'slscript' , 'small' , 'smisome1' , 'smkeyboard' , 'smscript' , 'smshadow' , 'smslant' , 'smtengwar' , 'speed' , 'stacey' , 'stampatello' , 'standard' , 'starwars' , 'stellar' , 'stop' , 'straight' , 't__of_ap' , 'tanja' , 'tengwar' , 'thick' , 'thin' , 'threepoint' , 'ticks' , 'ticksslant' , 'tinker-toy' , 'tombstone' , 'trek' , 'tsalagi' , 'twin_cob' , 'twopoint' , 'univers' , 'usaflag' , 'utopiabi' , 'weird' , 'whimsy' , 'xbritebi' , 'xcourbi']
-    
+    fonts = ['3-d', '3x5', '5lineoblique', 'a_zooloo', 'acrobatic', 'alligator', 'alligator2', 'alphabet', 'avatar', 'banner', 'banner3-D', 'banner4', 'barbwire', 'basic', 'bell', 'big', 'bigchief', 'block', 'britebi', 'broadway', 'bubble', 'bulbhead', 'calgphy2', 'caligraphy', 'catwalk', 'charact1', 'charact4', 'chartri', 'chunky', 'clb6x10', 'coinstak', 'colossal', 'computer', 'contessa', 'contrast', 'cosmic', 'cosmike', 'courbi', 'crawford', 'cricket', 'cursive', 'cyberlarge', 'cybermedium', 'cybersmall', 'devilish', 'diamond', 'digital', 'doh', 'doom', 'dotmatrix', 'double', 'drpepper', 'dwhistled', 'eftichess', 'eftifont', 'eftipiti', 'eftirobot', 'eftitalic', 'eftiwall', 'eftiwater', 'epic', 'fender', 'fourtops', 'fraktur', 'funky_dr', 'fuzzy', 'goofy', 'gothic', 'graceful', 'graffiti', 'helvbi', 'hollywood', 'home_pak', 'invita', 'isometric1', 'isometric2', 'isometric3', 'isometric4', 'italic', 'ivrit', 'jazmine', 'jerusalem', 'kban', 'larry3d', 'lean', 'letters', 'linux', 'lockergnome', 'madrid', 'marquee', 'maxfour', 'mike', 'mini', 'mirror', 'moscow', 'mshebrew210', 'nancyj-fancy', 'nancyj-underlined', 'nancyj', 'new_asci', 'nipples', 'ntgreek', 'nvscript', 'o8', 'odel_lak', 'ogre', 'os2', 'pawp', 'peaks', 'pebbles', 'pepper', 'poison', 'puffy', 'rectangles', 'relief', 'relief2', 'rev', 'roman', 'rounded', 'rowancap', 'rozzo', 'runic', 'runyc', 'sansbi', 'sblood', 'sbookbi', 'script', 'serifcap', 'shadow', 'short', 'sketch_s', 'slant', 'slide', 'slscript', 'small', 'smisome1', 'smkeyboard', 'smscript', 'smshadow', 'smslant', 'smtengwar', 'speed', 'stacey', 'stampatello', 'standard', 'starwars', 'stellar', 'stop', 'straight', 't__of_ap', 'tanja', 'tengwar', 'thick', 'thin', 'threepoint', 'ticks', 'ticksslant', 'tinker-toy', 'tombstone', 'trek', 'tsalagi', 'twin_cob', 'twopoint', 'univers', 'usaflag', 'utopiabi', 'weird', 'whimsy', 'xbritebi', 'xcourbi']
+
     import random
     import pyfiglet
     # do 100 tries in case font doesn't exist
     # if there are 100 failures, asciiArtText will fail/barf on its Figlet constructor
-    for i in range (100):
-        fi = fonts[random.randint (0, len (fonts) - 1)]
-        #print (fi)
+    for i in range(100):
+        fi = fonts[random.randint(0, len(fonts) - 1)]
+        # print(fi)
         try:
-            f = pyfiglet.Figlet (font=fi)
+            pyfiglet.Figlet(font=fi)
         except:
             continue
         break
-    #print (f.renderText (fi) )
-    #fi = "bulbhead"
+    # print(f.renderText(fi))
+    # fi = "bulbhead"
     return fi
-    
 
-def asciiArtText (str, term_w):
+
+def asciiArtText(str, term_w):
     # do 100 attempts to find a suitable font
     # criteria:
     #   must be narrower than term window
-    #   wider than 1/4 the term window (the larger, the prettier)
-    out = "\n" + str + "\n" + '-' * len (str) + "\n"
+    #   wider than 1/4 the term window(the larger, the prettier)
+    out = "\n" + str + "\n" + '-' * len(str) + "\n"
     fi = "none"
-    for i in range (100):
+    from io import StringIO
+    for i in range(100):
         # this catches failure to load pyfiglet
         try:
             import pyfiglet
         except:
-            return (out, fi)
-        fi = randFont ()
-        f = pyfiglet.Figlet (font=fi) #, width=term_w )
-        out = f.renderText (str) 
-        from io import StringIO
-        out_IO = StringIO (out)
-        out_width = max([len (a) for a in out_IO.readlines ()])
-        #print ("outWidth: %d"%outWidth)
+            return(out, fi)
+        fi = randFont()
+        f = pyfiglet.Figlet(font=fi)  # , width=term_w )
+        out = f.renderText(str)
+        out_IO = StringIO(out)
+        out_width = max([len(a) for a in out_IO.readlines()])
+        # print("outWidth: %d"%outWidth)
         if out_width <= term_w and out_width > (term_w / 4):
-            #print ("Font name: " + fi)
-            return (out, fi)
-    return (out, fi)
+            # print("Font name: " + fi)
+            return(out, fi)
+    return(out, fi)
 
 
-def printAsciiArt (url, term_w, term_h):
+def printAsciiArt(url, term_w, term_h):
     # Creates an ascii art image from an arbitrary image
-    # orig author: Steven Kay 7 Sep 2009 
+    # orig author: Steven Kay 7 Sep 2009
     # mod by x0rion Feb 2014
-    #print ("Printing ASCII Art for " + url)
+    # print("Printing ASCII Art for " + url)
     try:
-        from PIL import Image # pip install pillow
+        from PIL import Image  # pip install pillow
     except:
-        print ("Hey-o, you don't have image manipulation libs installed: pip install pillow")
+        print("Hey-o, you don't have image manipulation libs installed: pip install pillow")
         return
 
     import random
     from bisect import bisect
- 
 
-    im_height = term_h - 5 # leave room for other output
-    if term_w < (term_h * 2): # optimal image is 2x wider than higher, make sure it can fit in term
-         im_height = int (term_w/2)
-    im_width = im_height * 2 # im_width <= term_w, bc im_w=term_w/2*2 = (im_w=im_h*2 and im_h=term_w/2)
+    im_height = term_h - 5  # leave room for other output
+    if term_w < (term_h * 2):  # optimal image is 2x wider than higher, make sure it can fit in term
+        im_height = int(term_w / 2)
+    im_width = im_height * 2  # im_width <= term_w, bc im_w=term_w/2*2 = (im_w=im_h*2 and im_h=term_w/2)
     if im_height < 25:
-        print ("Not drawing art until terminal gets bigger (im_h >= 25)")
-        print ("(w,h) im: (%d,%d) term: (%d,%d)"%(im_width, im_height, term_w, term_h) )
+        print("Not drawing art until terminal gets bigger(im_h >= 25)")
+        print("(w,h) im: (%d,%d) term: (%d,%d)" % (im_width, im_height, term_w, term_h))
         return
- 
+
     # greyscale.. the following strings represent
     # 7 tonal ranges, from lighter to darker.
     # for a given pixel tonal level, choose a character
     # at random from that range.
-    greyscale = [
-             " ",
-             " ",
-             "-",     #".,-",
-             "=~+*",  #"_ivc=!/|\\~",
-             "[]()",  #"gjez2]/(YL)t[+T7Vf",
-             "mdbwz", #"mdK4ZGbNDXY5P*Q",
-             "WKMA",
-             "#@$&"   #"#%$"
-             ]
- 
+    greyscale = [" ",
+                 " ",
+                 "-",      # ".,-",
+                 "=~+*",   # "_ivc=!/|\\~",
+                 "[]()",   # "gjez2]/(YL)t[+T7Vf",
+                 "mdbwz",  # "mdK4ZGbNDXY5P*Q",
+                 "WKMA",
+                 "#@$&"    # "#%$"
+                 ]
+
     # using the bisect class to put luminosity values
     # in various ranges.
     # these are the luminosity cut-off points for each
     # of the 7 tonal levels. At the moment, these are 7 bands
     # of even width, but they could be changed to boost
     # contrast or change gamma, for example.
- 
-    zonebounds=[36,72,108,144,180,216,252]
- 
+
+    zonebounds = [36, 72, 108, 144, 180, 216, 252]
+
     # open image and resize
     from urllib.request import urlopen
     try:
-        image = urlopen (url).read ()
+        image = urlopen(url).read()
     except:
-        print ("Warning: couldn't retrieve file" + url)
+        print("Warning: couldn't retrieve file" + url)
         return
 
     from io import BytesIO
-    im = Image.open (BytesIO (image))
+    im = Image.open(BytesIO(image))
     # experiment with aspect ratios according to font
     #   w , h
-    #im=im.resize((160, 75),Image.BILINEAR)
-    im = im.resize ( (im_width, im_height), Image.BILINEAR)
-    im = im.convert ("L") # convert to mono
-     
+    # im=im.resize((160, 75),Image.BILINEAR)
+    im = im.resize((im_width, im_height), Image.BILINEAR)
+    im = im.convert("L")  # convert to mono
+
     # now, work our way over the pixels
     # build up str
-    str=""
-    for y in range (0, im.size[1]):
-        for x in range (0, im.size[0]):
-            lum = 255 - im.getpixel ( (x,y) )
-            row = bisect (zonebounds, lum)
+    str_ = ""
+    for y in range(0, im.size[1]):
+        for x in range(0, im.size[0]):
+            lum = 255 - im.getpixel((x, y))
+            row = bisect(zonebounds, lum)
             possibles = greyscale[row]
-            str = str + possibles[random.randint (0, len (possibles) - 1)]
-        if y != (im.size[1] - 1): str = str + "\n"
-    print (str)
+            str_ = str_ + possibles[random.randint(0, len(possibles) - 1)]
+        if y != (im.size[1] - 1):
+            str_ = str_ + "\n"
+    print(str_)
     return
-    
 
-def getStations (filename, mode):
+
+def getStations(filename, mode):
     # if channel file older than X days rebuild
     import os
     try:
-        chan_age = os.path.getctime (filename)
+        chan_age = os.path.getctime(filename)
     except:
         chan_age = 0
-    age_limit = time.time () - (60*60*24*CHAN_AGE_LIMIT)
+    age_limit = time.time() - (60 * 60 * 24 * CHAN_AGE_LIMIT)
     if mode != "favs" and chan_age < age_limit:
-        with colors ("red"):
-            print("The channels file (%s) is too old, moving to bck so new one can be built"%filename)
-        os.system ("mv " + filename + " " + filename + ".bck")
-    
+        with colors("red"):
+            print("The channels file(%s) is too old, moving to bck so new one can be built" % filename)
+        os.system("mv " + filename + " " + filename + ".bck")
+
     # see if the channel file exists, catch other errors to
     # if it doesn't exist, try to rebuild it and carry on
     try:
-        csv_fd = open (filename, 'r')
+        csv_fd = open(filename, 'r')
     except IOError as e:
         # The file doesn't exist, we need to build it!
-        with colors ("red"):
-            print("The channels file (%s) doesn't exist; it needs to be rebuilt."%filename)
+        with colors("red"):
+            print("The channels file(%s) doesn't exist; it needs to be rebuilt." % filename)
         if mode == "favs":
-            buildFavsChannelFile (filename)
-            #print("Error the favs file (%s) must be built manually; exiting."%filename)
-            #sys.exit (1)
+            buildFavsChannelFile(filename)
+            # print("Error the favs file(%s) must be built manually; exiting."%filename)
+            # sys.exit(1)
         elif mode == "soma":
-            buildSomaChannelFile (filename)
+            buildSomaChannelFile(filename)
         elif mode == "difm":
-            chans = buildDifmChannelFile (filename)
+            chans = buildDifmChannelFile(filename)
             if chans == 0:
-                os.system ("cp " + filename + ".bck " + filename)
-                with colors ("red"):
+                os.system("cp " + filename + ".bck " + filename)
+                with colors("red"):
                     print("Warning: buildDifmChannelFile failure, restoring from .bck")
-        with colors ("red"):
-            print("Finished building channel file") #", please run again."
+        with colors("red"):
+            print("Finished building channel file")  # ", please run again."
         # one last try to open the rebuilt file
         try:
-            csv_fd = open (filename,'r')
+            csv_fd = open(filename, 'r')
         except IOError as e:
-            with colors ("red"):
-                print("Error opening channel, please run again.")
-            sys.exit (1)
-    
-    chan_Csv = csv.reader (csv_fd)
- 
+            with colors("red"):
+                print("Error (%s) opening channel, please run again." % e)
+            sys.exit(1)
+
+    chan_Csv = csv.reader(csv_fd)
+
     i = 0
     chans = {}
     for row in chan_Csv:
-        # Skip rows that don't have three columns or rows that begin with #
-        if len (row) !=4 or row[0][0] == '#':
+        # Skip rows that don't have three columns or rows that begin with  #
+        if len(row) != 4 or row[0][0] == '#':
             continue
-        for j in range (len (row) ):
-            row[j] = row[j].strip ()
-            #if j == 1 or j == 2: print ("chans[" + str(i) + "][" + str(j) + "]: '" + row[j] + "'")
+        for j in range(len(row)):
+            row[j] = row[j].strip()
+            # if j == 1 or j == 2: print("chans[" + str(i) + "][" + str(j) + "]: '" + row[j] + "'")
         chans[i] = row
-        i+=1
+        i += 1
     return chans
 
-    
-def printStations (chans, term_w, mode):
-    keys = list (chans.keys () )
+
+def printStations(chans, term_w, mode):
+    keys = list(chans.keys())
     line_cnt = 0
-    if len (keys) == 0:
+    if len(keys) == 0:
         print("Exiting, empty channels file, delete it and rerun")
-        sys.exit (1)
-    keys.sort ()
+        sys.exit(1)
+    keys.sort()
     # sets up infor to pretty print station data
-    #for i in keys:
+    # for i in keys:
     # get left column width
-    name_len = max ([len (chans[a][1]) for a in chans]) + 1
+    name_len = max([len(chans[a][1]) for a in chans]) + 1
     desc_len = term_w - name_len
     # the first line has the name, each subsequent line has whitespace up to column begin mark
-    desc_first_line_fmt = "{{0:{0}}}".format (desc_len)
-    desc_nth_line_fmt   = ' ' * (name_len + 4) + desc_first_line_fmt
+    # desc_first_line_fmt = "{{0:{0}}}".format(desc_len)
+    # desc_nth_line_fmt   = ' ' * (name_len + 4) + desc_first_line_fmt
     # print the stations
     for i in keys:
-        #print " %i) %s"%(i,chans[i][1])
-        with colors ("yellow"):
-            sys.stdout.write (" %2d"%i + " ) " + chans[i][1] + ' ' * (name_len - len (chans[i][1]) ) )
-        with colors ("green"):
-            #print ("desc" + desc[i])
-            lines = textwrap.wrap (chans[i][2], desc_len - 6)
-            line_cnt += len (lines)
-            print (lines[0])
+        # print " %i) %s"%(i,chans[i][1])
+        with colors("yellow"):
+            sys.stdout.write(" %2d" % i + " ) " + chans[i][1] + ' ' * (name_len - len(chans[i][1])))
+        with colors("green"):
+            # print("desc" + desc[i])
+            lines = textwrap.wrap(chans[i][2], desc_len - 6)
+            line_cnt += len(lines)
+            print(lines[0])
             for line in lines[1:]:
-                print (' ' * (name_len + 6) + line)
-    #gen_line_cnt = line_cnt
-                
+                print(' ' * (name_len + 6) + line)
+    # gen_line_cnt = line_cnt
+
     # print the hard coded access to the other station files pt 1
     if mode == "soma" or mode == "difm":
-        with colors ("yellow"):
-            sys.stdout.write (" %2d"% len (keys) + " ) Favorites" + ' ' * (name_len - len ("Favorites") ) )
-        with colors ("green"):
+        with colors("yellow"):
+            sys.stdout.write(" %2d" % len(keys) + " ) Favorites" + ' ' * (name_len - len("Favorites")))
+        with colors("green"):
             lines = []
-            lines = textwrap.wrap ("Enter " + str (len (keys) ) + " or 'f' to show favorite channels", desc_len - 6)
-            line_cnt += len (lines)
-            print (lines[0])
+            lines = textwrap.wrap("Enter " + str(len(keys)) + " or 'f' to show favorite channels", desc_len - 6)
+            line_cnt += len(lines)
+            print(lines[0])
             for line in lines[1:]:
-                print (' ' * (name_len + 6) + line)
+                print(' ' * (name_len + 6) + line)
     elif mode == "favs":
-        with colors ("yellow"):
-            sys.stdout.write (" %2d"% len (keys) + " ) SomaFM" + ' ' * (name_len - len ("SomaFM") ) )
-        with colors ("green"):
+        with colors("yellow"):
+            sys.stdout.write(" %2d" % len(keys) + " ) SomaFM" + ' ' * (name_len - len("SomaFM")))
+        with colors("green"):
             lines = []
-            lines = textwrap.wrap ("Enter " + str (len (keys) ) + " or 's' to show SomaFM channels", desc_len - 6)
-            line_cnt += len (lines)
-            print (lines[0])
+            lines = textwrap.wrap("Enter " + str(len(keys)) + " or 's' to show SomaFM channels", desc_len - 6)
+            line_cnt += len(lines)
+            print(lines[0])
             for line in lines[1:]:
-                print (' ' * (name_len + 6) + line)
-        
-            
+                print(' ' * (name_len + 6) + line)
+
     # print the hard coded access to the other station files pt 2
     if mode == "soma" or mode == "favs":
-        with colors ("yellow"):
-            sys.stdout.write (" %2d"% (len (keys) + 1) + " ) Di.FM" + ' ' * (name_len - len ("Di.FM") ) )
-        with colors ("green"):
+        with colors("yellow"):
+            sys.stdout.write(" %2d" % (len(keys) + 1) + " ) Di.FM" + ' ' * (name_len - len("Di.FM")))
+        with colors("green"):
             lines = []
-            lines = textwrap.wrap ("Enter " + str (len (keys) + 1) + " or 'd' to show Di.FM channels", desc_len - 6)
-            line_cnt += len (lines)
-            print (lines[0])
+            lines = textwrap.wrap("Enter " + str(len(keys) + 1) + " or 'd' to show Di.FM channels", desc_len - 6)
+            line_cnt += len(lines)
+            print(lines[0])
             for line in lines[1:]:
-                print (' ' * (name_len + 6) + line)
+                print(' ' * (name_len + 6) + line)
     elif mode == "difm":
-        with colors ("yellow"):
-            sys.stdout.write (" %2d"% (len (keys) + 1) + " ) SomaFM" + ' ' * (name_len - len ("SomaFM") ) )
-        with colors ("green"):
+        with colors("yellow"):
+            sys.stdout.write(" %2d" % (len(keys) + 1) + " ) SomaFM" + ' ' * (name_len - len("SomaFM")))
+        with colors("green"):
             lines = []
-            lines = textwrap.wrap ("Enter " + str (len (keys) + 1) + " or 's' to show SomaFM channels", desc_len - 6)
-            line_cnt += len (lines)
-            print (lines[0])
+            lines = textwrap.wrap("Enter " + str(len(keys) + 1) + " or 's' to show SomaFM channels", desc_len - 6)
+            line_cnt += len(lines)
+            print(lines[0])
             for line in lines[1:]:
-                print (' ' * (name_len + 6) + line)
-    #return (keys, gen_line_cnt)
-    return (keys, line_cnt - 1)
+                print(' ' * (name_len + 6) + line)
+    # return(keys, gen_line_cnt)
+    return(keys, line_cnt - 1)
 
 
-def playStation (url, prefix, show_deets=1):
+def playStation(url, prefix, show_deets=1):
     import subprocess
-    #import sys
+    # import sys
     # mpg123 command line mp3 stream player, does unbuffered output, so the subprocess...readline snip works
     # -C allows keyboard presses to send commands: space is pause/resume, q is quit, +/- control volume
-    # -@ tells it to read (for stream/playlist info) filenames/URLs from within the file located at the next arg 
+    # -@ tells it to read (for stream/playlist info) filenames/URLs from within the file located at the next arg
     subp_cmd = []
     if PROXY != "":
         subp_cmd = ["mpg123", "-f", VOL, "-p", PROXY, "-C", "-@", url]
     else:
         subp_cmd = ["mpg123", "-f", VOL, "-C", "-@", url]
-    p = subprocess.Popen (subp_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    p = subprocess.Popen(subp_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     import re
-    # "le='([^']*)';" -> Song title didn't parse (StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)
+    # "le='([^']*)';" -> Song title didn't parse(StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)
     # Can't rely on no ' within title, so use ; eg "le='([^;]*)';"
-    title_re = re.compile ("le='([^;]*)';")
+    title_re = re.compile("le='([^;]*)';")
 
     delete_cnt = 0
     has_deeted = False
     has_titled = False
-    for line in iter (p.stdout.readline, b''):
-        out = bytes.decode (line) 
-        out = out.strip ()
+    for line in iter(p.stdout.readline, b''):
+        out = bytes.decode(line)
+        out = out.strip()
         if show_deets and not has_deeted and out[0:8] == "ICY-NAME":
             station_deets = out[10:]
-            if station_deets[0:3] != "Def": # bc it's kinda poser having so much 'defcon' all over your screen
-                #print (">>> " +  station_deets)
-                (term_w, term_h) = resetDimensions ()
-                lines = textwrap.wrap (station_deets, term_w - len (prefix) )
-                print (prefix + lines[0])
+            if station_deets[0:3] != "Def":  # bc it's kinda poser having so much 'defcon' all over your screen
+                # print(">>> " +  station_deets)
+                (term_w, term_h) = resetDimensions()
+                lines = textwrap.wrap(station_deets, term_w - len(prefix))
+                print(prefix + lines[0])
                 for line in lines[1:]:
-                    print (' ' * len (prefix) + line)
+                    print(' ' * len(prefix) + line)
             has_deeted = True
         elif out[0:8] == "ICY-META":
             out = out[10:]
-            #print (">>> " +  out)
-            title_m = title_re.search (out)
+            # print(">>> " +  out)
+            title_m = title_re.search(out)
             try:
-                song_title = title_m.group (1)
+                song_title = title_m.group(1)
             except:
-                song_title = "Song title didn't parse (" + out + ")"
-            # confine song title to single line to look good 
-            (term_w, term_h) = resetDimensions ()
-            if len (song_title) > (term_w - len (prefix) ):
-                song_title = song_title[0:(term_w - len (prefix) )]
+                song_title = "Song title didn't parse(" + out + ")"
+            # confine song title to single line to look good
+            (term_w, term_h) = resetDimensions()
+            if len(song_title) > (term_w - len(prefix)):
+                song_title = song_title[0:(term_w - len(prefix))]
             # this will delete the last song, and reuse its line (so output only has one song title line)
             if COMPACT_TITLES:
                 if has_titled:
-                    #deleteChars (delete_cnt)
-                    deletePromptChars (delete_cnt)
+                    # deleteChars(delete_cnt)
+                    deletePromptChars(delete_cnt)
                 else:
                     has_titled = True
-                print (prefix + song_title)#, end='')
-                sys.stdout.flush ()
-                delete_cnt = len (song_title) + len (prefix)
+                print(prefix + song_title)  # , end='')
+                sys.stdout.flush()
+                delete_cnt = len(song_title) + len(prefix)
             else:
-                print (prefix + song_title)
+                print(prefix + song_title)
     return delete_cnt
 
 
-def deleteChars (num_chars):
-    print ('\b' * num_chars, end='') # move cursor to beginning of text to remove
-    print (' '  * num_chars, end='') # overwrite/delete all previous text
-    print ('\b' * num_chars, end='') # reset cursor for new text
+def deleteChars(num_chars):
+    print('\b' * num_chars, end='')  # move cursor to beginning of text to remove
+    print(' '  * num_chars, end='')  # overwrite/delete all previous text
+    print('\b' * num_chars, end='')  # reset cursor for new text
     return
 
 
 # \033[A moves cursor up 1 line; ' ' overwrites text, '\b' resets cursor to start of line
 # if the term is narrow enough, you need to go up multiple lines
-def deletePromptChars (num_chars):
+def deletePromptChars(num_chars):
     # determine lines to move up, there is at least 1 bc user pressed enter to give input
     # when they pressed Enter, the cursor went to beginning of the line
-    (term_w, term_h) = resetDimensions ()
+    (term_w, term_h) = resetDimensions()
     import math
-    move_up = int ( math.ceil (float (num_chars) / float (term_w) ) )
-    print ("\033[A" * move_up + ' ' * num_chars + '\b' * (num_chars), end='')
+    move_up = int(math.ceil(float(num_chars) / float(term_w)))
+    print("\033[A" * move_up + ' ' * num_chars + '\b' * (num_chars), end='')
     return
 
-     
-def resetDimensions ():
+
+def resetDimensions():
     try:
         # *nix get terminal/console width
         import os
-        rows, columns = os.popen ('stty size', 'r').read().split()
-        width  = int (columns)
-        height = int (rows)
-        return (width, height)
-        #print ("term width: %d"% width)
+        rows, columns = os.popen('stty size', 'r').read().split()
+        width  = int(columns)
+        height = int(rows)
+        return(width, height)
+        # print("term width: %d"% width)
     except:
-        return (80, 40)
-            
+        return(80, 40)
 
-def usage ():
-    print (USAGE%sys.argv[0])
-    (term_w, term_h) = resetDimensions ()
-    (banner, font) = asciiArtText ("ASCII Art, FTW!", term_w)
-    with colors ("purple"): # or blue, green, yellow, red
-        print (banner)
-    print ("Font: " + font)
-    sys.exit (0)
-    
 
-if __name__=="__main__":
+def usage():
+    print(USAGE % sys.argv[0])
+    (term_w, term_h) = resetDimensions()
+    (banner, font) = asciiArtText("ASCII Art, FTW!", term_w)
+    with colors("purple"):  # or blue, green, yellow, red
+        print(banner)
+    print("Font: " + font)
+    sys.exit(0)
+
+
+
+
+if __name__ == "__main__":
     try:
         import platform
-        if platform.python_version().startswith ('2'):
-            print ("Error: 2.3<ver<3 upgrade to py >=3!")
-        #if platform.python_version().startswith('3'):
-        #    print ("Error: ver>=3, use 2to3 or python2.7")
-            sys.exit (1)
+        if platform.python_version().startswith('2'):
+            print("Error: 2.3<ver<3 upgrade to py >=3!")
+        # if platform.python_version().startswith('3'):
+        #    print("Error: ver>=3, use 2to3 or python2.7")
+            sys.exit(1)
     except ImportError as e:
-            print ("Error: import")
-            sys.exit (1)
-            
-    sys.stdout.write ("\x1b]0;" + BANNER + "\x07")
-    #######
+            print("Error: import")
+            sys.exit(1)
+
+    sys.stdout.write("\x1b]0;" + BANNER + "\x07")
+    # ######
     # handle command line args
     mode = "favs"
     chan_filename = FAVS_CHAN_FILENAME
     import getopt
-    try: 
-        opts, args = getopt.getopt (sys.argv[1:], "hsdx:", ["help","soma","difm","proxy="])
-    except getoptGetoptError:
-        usage ()
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hsdx:", ["help", "soma", "difm", "proxy="])
+    except getopt.GetoptError:
+        usage()
     for opt, arg in opts:
-        #print ("here")
-        if opt in ("-s", "--soma"):
+        # print("here")
+        if opt in("-s", "--soma"):
             mode = "soma"
             chan_filename = SOMA_CHAN_FILENAME
-        elif opt in ("-d", "--difm"):
+        elif opt in("-d", "--difm"):
             mode = "difm"
             chan_filename = DIFM_CHAN_FILENAME
-        elif opt in ("-x", "--proxy"):
+        elif opt in("-x", "--proxy"):
             PROXY = arg
-            #print ("Using proxy " + PROXY)
-        elif opt in ("-h", "--help"):
-            usage ()
+            # print("Using proxy " + PROXY)
+        elif opt in("-h", "--help"):
+            usage()
         else:
-            usage ()
-    
+            usage()
+
     # we want the home directory to find/store the channels file
     from os.path import expanduser
     home = expanduser("~")
-    
-    #######
+
+    # ######
     # get the station list
-    chans = getStations (home + "/" + chan_filename, mode)
- 
-    #######
+    chans = getStations(home + "/" + chan_filename, mode)
+
+    # ######
     # main loop
     # shows possible stations, takes in user input, and calls player
     # when the player is exited, this loop happens again
     switch_mode = False
-    while (1):
-        (term_w, term_h) = resetDimensions ()
+    while(1):
+        (term_w, term_h) = resetDimensions()
         if switch_mode != '':
             if switch_mode == 'f':
                 mode = "favs"
@@ -761,11 +768,10 @@ if __name__=="__main__":
             elif switch_mode == 'd':
                 mode = "difm"
                 chan_filename = DIFM_CHAN_FILENAME
-            chans = getStations (home + "/" + chan_filename, mode)
+            chans = getStations(home + "/" + chan_filename, mode)
             switch_mode = False
-                
-            
-        #######
+
+        # ######
         # print stations
         title = "unknown"
         if mode == "favs":
@@ -774,135 +780,133 @@ if __name__=="__main__":
             title = "SomaFM Tuner"
         elif mode == "difm":
             title = "Di.FM Tuner"
-        with colors ("red"):
-            (banner, font) = asciiArtText (title, term_w)
+        with colors("red"):
+            (banner, font) = asciiArtText(title, term_w)
             from io import StringIO
-            b_IO = StringIO (banner)
-            b_h = len (b_IO.readlines () )
-            print (banner) #, end='')
+            b_IO = StringIO(banner)
+            b_h = len(b_IO.readlines())
+            print(banner)  # , end='')
             b_h += 1
-        (keys, line_cnt) = printStations (chans, term_w, mode)
+        (keys, line_cnt) = printStations(chans, term_w, mode)
         loop_line_cnt = line_cnt + b_h + 2
         loop_line_cnt += 1
         if term_h > loop_line_cnt:
-            print ('\n' * (term_h - loop_line_cnt - 1) )
-        
-        #######
+            print('\n' * (term_h - loop_line_cnt - 1))
+
+        # ######
         # get user input
         switch_mode = ''
         chan_num = None
         while chan_num not in keys:
-            chan_num = input ("\nPlease select a channel [q to quit]: ")
-            if len (chan_num) > 0:
-                chan_num = chan_num.lower ()
+            chan_num = input("\nPlease select a channel [q to quit]: ")
+            if len(chan_num) > 0:
+                chan_num = chan_num.lower()
                 ctrl_char = chan_num[0]
-                if (ctrl_char == 'q' or ctrl_char == 'e'):
-                    sys.stdout.write ("\x1b]0;" + "\x07")
-                    sys.exit (0)
+                if(ctrl_char == 'q' or ctrl_char == 'e'):
+                    sys.stdout.write("\x1b]0;" + "\x07")
+                    sys.exit(0)
                 # they type in some variant of either difm or somafm or favs
                 if ctrl_char == mode[0]:
                     break
-                elif mode == "favs" and (ctrl_char == 's' or ctrl_char == 'd'):
+                elif mode == "favs" and(ctrl_char == 's' or ctrl_char == 'd'):
                     switch_mode = ctrl_char
                     break
-                elif mode == "soma" and (ctrl_char == 'f' or ctrl_char == 'd'):
+                elif mode == "soma" and(ctrl_char == 'f' or ctrl_char == 'd'):
                     switch_mode = ctrl_char
                     break
-                elif mode == "difm" and (ctrl_char == 'f' or ctrl_char == 's'):
+                elif mode == "difm" and(ctrl_char == 'f' or ctrl_char == 's'):
                     switch_mode = ctrl_char
                     break
             try:
-                chan_num = int (chan_num)
+                chan_num = int(chan_num)
                 if mode == "favs":
-                    if chan_num == len (keys):
+                    if chan_num == len(keys):
                         switch_mode = 's'
                         break
-                    elif chan_num == (len (keys) + 1):
+                    elif chan_num == (len(keys) + 1):
                         switch_mode = 'd'
                         break
                 if mode == "soma":
-                    if chan_num == len (keys):
+                    if chan_num == len(keys):
                         switch_mode = 'f'
                         break
-                    elif chan_num == (len (keys) + 1):
+                    elif chan_num == (len(keys) + 1):
                         switch_mode = 'd'
                         break
                 if mode == "difm":
-                    if chan_num == len (keys):
+                    if chan_num == len(keys):
                         switch_mode = 'f'
                         break
-                    elif chan_num == (len (keys) + 1):
+                    elif chan_num == (len(keys) + 1):
                         switch_mode = 's'
                         break
             except:
                 pass
 
-
-
-        if switch_mode != '' or (mode == "favs" and ctrl_char == 'f') or (mode == "soma" and ctrl_char == 's') or (mode == "difm" and ctrl_char == 'd'):
+        if switch_mode != '' or (mode == "favs" and ctrl_char == 'f') or(mode == "soma" and ctrl_char == 's') or (mode == "difm" and ctrl_char == 'd'):
             continue
-            
-        (term_w, term_h) = resetDimensions ()
-            
-        #######
+
+        (term_w, term_h) = resetDimensions()
+
+        # ######
         # call player
         if chans[chan_num][3] != "":
-            print ("ASCII Printout of Station's Logo:")
-            printAsciiArt (chans[chan_num][3], term_w, term_h)
+            print("ASCII Printout of Station's Logo:")
+            printAsciiArt(chans[chan_num][3], term_w, term_h)
         unhappy = True
         while unhappy:
-            (term_w, term_h) = resetDimensions ()
+            (term_w, term_h) = resetDimensions()
             font = "unknown"
-            with colors ("yellow"):
-                (banner, font) = asciiArtText (chans[chan_num][1], term_w)
+            with colors("yellow"):
+                (banner, font) = asciiArtText(chans[chan_num][1], term_w)
                 from io import StringIO
-                b_IO = StringIO (banner)
-                b_height = len (b_IO.readlines () )
-                if term_h > (b_height + 3): # Playing, Station Name, Song Title
-                    print ('\n' * (term_h - b_height - 2) )
-                print (banner, end='')
-            with colors ("purple"):
+                b_IO = StringIO(banner)
+                b_height = len(b_IO.readlines())
+                if term_h > (b_height + 3):  # Playing, Station Name, Song Title
+                    print('\n' * (term_h - b_height - 2))
+                print(banner, end='')
+            with colors("purple"):
                 prompt = "Press enter if you like banner (font: " + font + "), else any char then enter "
-                happiness = input (prompt)
-                deletePromptChars (len (prompt) + len (happiness) )
-                if len (happiness) == 0:
+                happiness = input(prompt)
+                deletePromptChars(len(prompt) + len(happiness))
+                if len(happiness) == 0:
                     unhappy = False
                     msg1 = "Playing station, enjoy..."
                     msg2 = "[pause/quit=q; vol=+/-]"
-                    if term_w > (len (msg1) + len (msg2) ):
-                        print (msg1 + ' ' + msg2)
+                    if term_w > (len(msg1) + len(msg2)):
+                        print(msg1 + ' ' + msg2)
                     else:
-                        print (msg1)
-                        print (msg2)
+                        print(msg1)
+                        print(msg2)
                 else:
-                    print ("") # empty line for pretty factor
+                    print("")  # empty line for pretty factor
         replay = True
         show_station_deets = True
         while replay:
-            with colors ("blue"):
+            with colors("blue"):
                 prefix = ">>> "
-                delete_cnt = playStation (chans[chan_num][0], prefix, show_station_deets)
-                deletePromptChars (delete_cnt)
-            with colors ("purple"):
+                delete_cnt = playStation(chans[chan_num][0], prefix, show_station_deets)
+                deletePromptChars(delete_cnt)
+            with colors("purple"):
                 # it will reach here anytime the player stops executing (eg it has an exp, failure, etc)
                 # but ideally it'll only reach here when the user presses q (exiting the player) to "pause" it
                 # you can't use mpg123's 'pause' cmd (spacebar) bc it'll fail a minute or two after resuming (buffer errors)
                 # for some reason it literally pauses the music, buffering the stream until unpaused
                 # behavior we want is to stop recving the stream (like turing off a radio)
                 prompt = "Paused. Press enter to Resume; q to quit. "
-                reloop = input (prompt)
+                reloop = input(prompt)
                 # if the user inputs anything other than pressing return/enter, then loop will quit
-                if len (reloop) != 0:
+                if len(reloop) != 0:
                     replay = False
                 else:
                     # for prettiness we don't want to reprint the station details (name, etc) upon replaying within this loop
                     show_station_deets = False
                     # we also want to get rid of that prompt to make room for the song name data again
-                    deletePromptChars (len (prompt) + len (prefix) )
-                    sys.stdout.flush ()
+                    deletePromptChars(len(prompt) + len(prefix))
+                    sys.stdout.flush()
                     # this play->pause->loop should never accumulate lines in the output (except for the first Enter they press at a prompt and even then it's just an empty line)
-        # end with 
-        #sys.exit (0)
+        # end with
+        # sys.exit(0)
     # end while { show list, play selected station, wait for player to exit }
 # end main
 
