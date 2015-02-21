@@ -687,10 +687,10 @@ def resetDimensions():
         rows, columns = os.popen('stty size', 'r').read().split()
         width  = int(columns)
         height = int(rows)
-        return(width, height)
+        return (width, height)
         # print("term width: %d"% width)
     except:
-        return(80, 40)
+        return (80, 40)
 
 
 def usage():
