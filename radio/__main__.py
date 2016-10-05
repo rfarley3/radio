@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function
+import sys
 try:
     import platform
     if platform.python_version().startswith('2'):
@@ -17,7 +19,7 @@ from .radio import (
 	resetDimensions,
 	asciiArtText,
 	colors,
-	getStations
+	getStations,
 	printStations,
 	printAsciiArt,
 	playStation,
