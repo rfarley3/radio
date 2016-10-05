@@ -1,4 +1,3 @@
 beautifulsoup4
 pyfiglet
-urllib
 pillow

@@ -10,7 +10,11 @@ setup(
     install_requires=[
         'beautifulsoup4',
         'pyfiglet',
-        'urllib',
         'pillow',
     ],
+    entry_points={
+        'console_scripts': [
+            'radio = radio.__main__:main',
+        ]
+    },
 )

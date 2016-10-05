@@ -48,7 +48,7 @@ def usage():
     sys.exit(0)
 
 
-if __name__ == "__main__":
+def main():
     sys.stdout.write("\x1b]0;" + BANNER + "\x07")
     # ######
     # handle command line args
@@ -236,4 +236,7 @@ if __name__ == "__main__":
         # end with
         # sys.exit(0)
     # end while { show list, play selected station, wait for player to exit }
-# end main
+
+
+if __name__ == "__main__":
+	sys.exit(main())
