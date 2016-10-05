@@ -17,6 +17,7 @@ else:
 from .radio import (
     BANNER,
     FAVS_CHAN_FILENAME,
+    SOMA_CHAN_FILENAME,
     resetDimensions,
     asciiArtText,
     colors,
