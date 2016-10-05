@@ -1,29 +1,30 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import sys
-try:
-    import platform
-    if platform.python_version().startswith('2'):
-        print("Error: 2.3<ver<3 upgrade to py >=3!")
-    # if platform.python_version().startswith('3'):
-    #    print("Error: ver>=3, use 2to3 or python2.7")
-        sys.exit(1)
-except ImportError as e:
-        print("Error: import platform")
-        sys.exit(1)
+import platform
+PY3 = False
+if platform.python_version().startswith('3'):
+    PY3 = True
 import getopt
 from os.path import expanduser
 from io import StringIO
 
+if PY3:
+    get_input = input
+else:
+    get_input = raw_input
+
 from .radio import (
-	resetDimensions,
-	asciiArtText,
-	colors,
-	getStations,
-	printStations,
-	printAsciiArt,
-	playStation,
-	deletePromptChars)
+    BANNER,
+    FAVS_CHAN_FILENAME,
+    resetDimensions,
+    asciiArtText,
+    colors,
+    getStations,
+    printStations,
+    printAsciiArt,
+    playStation,
+    deletePromptChars)
 
 
 USAGE = """Usage %s [-h|--help|-s|--soma|-d|--difm] [--proxy <url>]
@@ -129,13 +130,19 @@ def main():
         switch_mode = ''
         chan_num = None
         while chan_num not in keys:
-            chan_num = input("\nPlease select a channel [q to quit]: ")
+            try:
+                chan_num = get_input("\nPlease select a channel [q to quit]: ")
+            except SyntaxError:
+                chan_num = ''
+            except KeyboardInterrupt:
+                return 0
+            chan_num = str(chan_num)
             if len(chan_num) > 0:
                 chan_num = chan_num.lower()
                 ctrl_char = chan_num[0]
                 if(ctrl_char == 'q' or ctrl_char == 'e'):
                     sys.stdout.write("\x1b]0;" + "\x07")
-                    sys.exit(0)
+                    return 0
                 # they type in some variant of either difm or somafm or favs
                 if ctrl_char == mode[0]:
                     break
@@ -197,7 +204,10 @@ def main():
                 print(banner, end='')
             with colors("purple"):
                 prompt = "Press enter if you like banner (font: " + font + "), else any char then enter "
-                happiness = input(prompt)
+                try:
+                    happiness = get_input(prompt)
+                except SyntaxError:
+                    happiness = ''
                 deletePromptChars(len(prompt) + len(happiness))
                 if len(happiness) == 0:
                     unhappy = False
@@ -224,7 +234,7 @@ def main():
                 # for some reason it literally pauses the music, buffering the stream until unpaused
                 # behavior we want is to stop recving the stream (like turing off a radio)
                 prompt = "Paused. Press enter to Resume; q to quit. "
-                reloop = input(prompt)
+                reloop = get_input(prompt)
                 # if the user inputs anything other than pressing return/enter, then loop will quit
                 if len(reloop) != 0:
                     replay = False
@@ -235,10 +245,10 @@ def main():
                     deletePromptChars(len(prompt) + len(prefix))
                     sys.stdout.flush()
                     # this play->pause->loop should never accumulate lines in the output (except for the first Enter they press at a prompt and even then it's just an empty line)
-        # end with
-        # sys.exit(0)
-    # end while { show list, play selected station, wait for player to exit }
+            # end with
+        # end while { show list, play selected station, wait for player to exit }
+    return 0
 
 
 if __name__ == "__main__":
-	sys.exit(main())
+    sys.exit(main())

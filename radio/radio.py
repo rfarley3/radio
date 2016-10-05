@@ -1,3 +1,4 @@
+from __future__ import print_function
 ########################################
 # x0rion Feb 2014
 # SomaFM, Di.FM, WCPE (TheClassicalStation.org) terminal client
@@ -112,7 +113,6 @@ M([ K --------------(~([]-----------+M*K]   *==+  M  ]-*~~*++A-]-=[*))
 ][]))(( -A             )[)+-     ~ -+= *--- -~ *=~=+ ~~ - K))[])((*~=-
   A]][[) --*-----=~++]]+(]]]+*[ *  - ~~--   --~*+* +=* ~~ -- -)])[([))
 """
-from __future__ import print_function
 import csv
 import sys
 import textwrap
@@ -599,7 +599,10 @@ def playStation(url, prefix, show_deets=1):
         subp_cmd = ["mpg123", "-f", VOL, "-p", PROXY, "-C", "-@", url]
     else:
         subp_cmd = ["mpg123", "-f", VOL, "-C", "-@", url]
-    p = subprocess.Popen(subp_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    try:
+        p = subprocess.Popen(subp_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except OSError as e:
+        raise Exception('OSError %s when executing %s' % (e, subp_cmd))
     import re
     # "le='([^']*)';" -> Song title didn't parse(StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)
     # Can't rely on no ' within title, so use ; eg "le='([^;]*)';"
