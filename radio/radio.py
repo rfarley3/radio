@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 ########################################
 # x0rion Feb 2014
 # SomaFM, Di.FM, WCPE (TheClassicalStation.org) terminal client
