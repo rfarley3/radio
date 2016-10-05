@@ -1,4 +1,8 @@
 from __future__ import print_function
+import platform
+PY3 = False
+if platform.python_version().startswith('3'):
+    PY3 = True
 ########################################
 # x0rion Feb 2014
 # SomaFM, Di.FM, WCPE (TheClassicalStation.org) terminal client
@@ -117,7 +121,32 @@ import csv
 import sys
 import textwrap
 import time
-# import datetime
+import random
+import os
+import subprocess
+import re
+import math
+from bisect import bisect
+from bs4 import BeautifulSoup
+from io import StringIO
+from io import BytesIO
+PYFIG = True
+try:
+    import pyfiglet
+except ImportError:
+    PYFIG = False
+    print("Hey-o, you don't have ascii art banner libs installed: pip install pyfiglet")
+PYPILLOW = False
+try:
+    from PIL import Image  # pip install pillow
+except:
+    PYPILLOW = False
+    print("Hey-o, you don't have image manipulation libs installed: pip install pillow")
+if PY3:
+    from urllib.request import urlopen
+else:
+    from urllib2 import urlopen
+
 
 BANNER = "~=radio tuner=~"
 PROXY = ""  # no proxy needed
@@ -193,20 +222,15 @@ class colors:
         'endc'  : '\033[0m',
     }
 
-
     def __init__(self, color, out=sys.stdout):
         self.color = color
         self.out = out
 
-
     def __enter__(self):
         self.out.write(self.COLORS[self.color])
 
-
     def __exit__(self, type, value, traceback):
         self.out.write(self.COLORS['endc'])
-
-
 
 
 def buildFavsChannelFile(outfile):
@@ -223,14 +247,15 @@ def buildSomaChannelFile(outfile):
     # mod'ed by x0rion Feb 2014
     #   store name and desc seo; add img url
     #   handle specific bad streams
-    from bs4 import BeautifulSoup
-    from urllib.request import urlopen
     page = urlopen(SOMA_PARSE_URL)
-    soup = BeautifulSoup(page)
+    soup = BeautifulSoup(page, "html.parser")
     chan_instances = soup.findAll('li', {"class": "cbshort"})
 
     print("Building new channels file from somafm.com...")
-    csv_chan_file = open(outfile, 'w', newline='')  # per doc to avoid TypeError: 'str' does not support the buffer interface
+    if PY3:
+        csv_chan_file = open(outfile, 'w', newline='')  # per doc to avoid TypeError: 'str' does not support the buffer interface
+    else:
+        csv_chan_file = open(outfile, 'w')
     chan_writer = csv.writer(csv_chan_file)
 
     for inst in chan_instances:
@@ -275,9 +300,6 @@ def randFont():
     """
     # here are the fonts that I find the most interesting:
     fonts = ['3-d', '3x5', '5lineoblique', 'a_zooloo', 'acrobatic', 'alligator', 'alligator2', 'alphabet', 'avatar', 'banner', 'banner3-D', 'banner4', 'barbwire', 'basic', 'bell', 'big', 'bigchief', 'block', 'britebi', 'broadway', 'bubble', 'bulbhead', 'calgphy2', 'caligraphy', 'catwalk', 'charact1', 'charact4', 'chartri', 'chunky', 'clb6x10', 'coinstak', 'colossal', 'computer', 'contessa', 'contrast', 'cosmic', 'cosmike', 'courbi', 'crawford', 'cricket', 'cursive', 'cyberlarge', 'cybermedium', 'cybersmall', 'devilish', 'diamond', 'digital', 'doh', 'doom', 'dotmatrix', 'double', 'drpepper', 'dwhistled', 'eftichess', 'eftifont', 'eftipiti', 'eftirobot', 'eftitalic', 'eftiwall', 'eftiwater', 'epic', 'fender', 'fourtops', 'fraktur', 'funky_dr', 'fuzzy', 'goofy', 'gothic', 'graceful', 'graffiti', 'helvbi', 'hollywood', 'home_pak', 'invita', 'isometric1', 'isometric2', 'isometric3', 'isometric4', 'italic', 'ivrit', 'jazmine', 'jerusalem', 'kban', 'larry3d', 'lean', 'letters', 'linux', 'lockergnome', 'madrid', 'marquee', 'maxfour', 'mike', 'mini', 'mirror', 'moscow', 'mshebrew210', 'nancyj-fancy', 'nancyj-underlined', 'nancyj', 'new_asci', 'nipples', 'ntgreek', 'nvscript', 'o8', 'odel_lak', 'ogre', 'os2', 'pawp', 'peaks', 'pebbles', 'pepper', 'poison', 'puffy', 'rectangles', 'relief', 'relief2', 'rev', 'roman', 'rounded', 'rowancap', 'rozzo', 'runic', 'runyc', 'sansbi', 'sblood', 'sbookbi', 'script', 'serifcap', 'shadow', 'short', 'sketch_s', 'slant', 'slide', 'slscript', 'small', 'smisome1', 'smkeyboard', 'smscript', 'smshadow', 'smslant', 'smtengwar', 'speed', 'stacey', 'stampatello', 'standard', 'starwars', 'stellar', 'stop', 'straight', 't__of_ap', 'tanja', 'tengwar', 'thick', 'thin', 'threepoint', 'ticks', 'ticksslant', 'tinker-toy', 'tombstone', 'trek', 'tsalagi', 'twin_cob', 'twopoint', 'univers', 'usaflag', 'utopiabi', 'weird', 'whimsy', 'xbritebi', 'xcourbi']
-
-    import random
-    import pyfiglet
     # do 100 tries in case font doesn't exist
     # if there are 100 failures, asciiArtText will fail/barf on its Figlet constructor
     for i in range(100):
@@ -300,12 +322,9 @@ def asciiArtText(str, term_w):
     #   wider than 1/4 the term window(the larger, the prettier)
     out = "\n" + str + "\n" + '-' * len(str) + "\n"
     fi = "none"
-    from io import StringIO
     for i in range(100):
         # this catches failure to load pyfiglet
-        try:
-            import pyfiglet
-        except:
+        if not PYFIG:
             return(out, fi)
         fi = randFont()
         f = pyfiglet.Figlet(font=fi)  # , width=term_w )
@@ -324,15 +343,8 @@ def printAsciiArt(url, term_w, term_h):
     # orig author: Steven Kay 7 Sep 2009
     # mod by x0rion Feb 2014
     # print("Printing ASCII Art for " + url)
-    try:
-        from PIL import Image  # pip install pillow
-    except:
-        print("Hey-o, you don't have image manipulation libs installed: pip install pillow")
+    if not PYPILLOW:
         return
-
-    import random
-    from bisect import bisect
-
     im_height = term_h - 5  # leave room for other output
     if term_w < (term_h * 2):  # optimal image is 2x wider than higher, make sure it can fit in term
         im_height = int(term_w / 2)
@@ -366,14 +378,12 @@ def printAsciiArt(url, term_w, term_h):
     zonebounds = [36, 72, 108, 144, 180, 216, 252]
 
     # open image and resize
-    from urllib.request import urlopen
     try:
         image = urlopen(url).read()
     except:
         print("Warning: couldn't retrieve file" + url)
         return
 
-    from io import BytesIO
     im = Image.open(BytesIO(image))
     # experiment with aspect ratios according to font
     #   w , h
@@ -398,7 +408,6 @@ def printAsciiArt(url, term_w, term_h):
 
 def getStations(filename, mode):
     # if channel file older than X days rebuild
-    import os
     try:
         chan_age = os.path.getctime(filename)
     except:
@@ -504,8 +513,6 @@ def printStations(chans, term_w, mode):
 
 
 def playStation(url, prefix, show_deets=1):
-    import subprocess
-    # import sys
     # mpg123 command line mp3 stream player, does unbuffered output, so the subprocess...readline snip works
     # -C allows keyboard presses to send commands: space is pause/resume, q is quit, +/- control volume
     # -@ tells it to read (for stream/playlist info) filenames/URLs from within the file located at the next arg
@@ -518,7 +525,6 @@ def playStation(url, prefix, show_deets=1):
         p = subprocess.Popen(subp_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except OSError as e:
         raise Exception('OSError %s when executing %s' % (e, subp_cmd))
-    import re
     # "le='([^']*)';" -> Song title didn't parse(StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)
     # Can't rely on no ' within title, so use ; eg "le='([^;]*)';"
     title_re = re.compile("le='([^;]*)';")
@@ -579,7 +585,6 @@ def deletePromptChars(num_chars):
     # determine lines to move up, there is at least 1 bc user pressed enter to give input
     # when they pressed Enter, the cursor went to beginning of the line
     (term_w, term_h) = resetDimensions()
-    import math
     move_up = int(math.ceil(float(num_chars) / float(term_w)))
     print("\033[A" * move_up + ' ' * num_chars + '\b' * (num_chars), end='')
     return
@@ -588,7 +593,6 @@ def deletePromptChars(num_chars):
 def resetDimensions():
     try:
         # *nix get terminal/console width
-        import os
         rows, columns = os.popen('stty size', 'r').read().split()
         width  = int(columns)
         height = int(rows)
