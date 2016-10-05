@@ -28,14 +28,13 @@ from .radio import (
     deletePromptChars)
 
 
-USAGE = """Usage %s [-h|--help|-s|--soma|-d|--difm] [--proxy <url>]
+USAGE = """Usage %s [-h|--help|-s|--soma] [--proxy <url>]
 \t-h or --help\tThis help message
 \t-s or --soma\tRun in SomaFM mode
-\t-d or --difm\tRun in Di.FM mode
 \t-x or --proxy\tSet the proxy server
 
 Python script for direct listening to online music streams.
-Built-in compatibility with SomaFM and Di.FM.
+Built-in compatibility with SomaFM.
 Scrapes respective websites for urls and metadata.
 Puts it all into a nice list for you to select from, then calls mpg123.
 And let's not forget the pretty ASCII art...
@@ -59,7 +58,7 @@ def main():
     mode = "favs"
     chan_filename = FAVS_CHAN_FILENAME
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hsdx:", ["help", "soma", "difm", "proxy="])
+        opts, args = getopt.getopt(sys.argv[1:], "hsdx:", ["help", "soma", "proxy="])
     except getopt.GetoptError:
         usage()
     for opt, arg in opts:
@@ -67,9 +66,6 @@ def main():
         if opt in("-s", "--soma"):
             mode = "soma"
             chan_filename = SOMA_CHAN_FILENAME
-        elif opt in("-d", "--difm"):
-            mode = "difm"
-            chan_filename = DIFM_CHAN_FILENAME
         elif opt in("-x", "--proxy"):
             PROXY = arg
             # print("Using proxy " + PROXY)
@@ -99,9 +95,6 @@ def main():
             elif switch_mode == 's':
                 mode = "soma"
                 chan_filename = SOMA_CHAN_FILENAME
-            elif switch_mode == 'd':
-                mode = "difm"
-                chan_filename = DIFM_CHAN_FILENAME
             chans = getStations(home + "/" + chan_filename, mode)
             switch_mode = False
 
@@ -112,8 +105,6 @@ def main():
             title = "Radio Tuner"
         elif mode == "soma":
             title = "SomaFM Tuner"
-        elif mode == "difm":
-            title = "Di.FM Tuner"
         with colors("red"):
             (banner, font) = asciiArtText(title, term_w)
             b_IO = StringIO(banner)
@@ -144,16 +135,13 @@ def main():
                 if(ctrl_char == 'q' or ctrl_char == 'e'):
                     sys.stdout.write("\x1b]0;" + "\x07")
                     return 0
-                # they type in some variant of either difm or somafm or favs
+                # they type in some variant of either somafm or favs
                 if ctrl_char == mode[0]:
                     break
-                elif mode == "favs" and(ctrl_char == 's' or ctrl_char == 'd'):
+                elif mode == "favs" and ctrl_char == 's':
                     switch_mode = ctrl_char
                     break
-                elif mode == "soma" and(ctrl_char == 'f' or ctrl_char == 'd'):
-                    switch_mode = ctrl_char
-                    break
-                elif mode == "difm" and(ctrl_char == 'f' or ctrl_char == 's'):
+                elif mode == "soma" and ctrl_char == 'f':
                     switch_mode = ctrl_char
                     break
             try:
@@ -162,27 +150,14 @@ def main():
                     if chan_num == len(keys):
                         switch_mode = 's'
                         break
-                    elif chan_num == (len(keys) + 1):
-                        switch_mode = 'd'
-                        break
                 if mode == "soma":
                     if chan_num == len(keys):
                         switch_mode = 'f'
                         break
-                    elif chan_num == (len(keys) + 1):
-                        switch_mode = 'd'
-                        break
-                if mode == "difm":
-                    if chan_num == len(keys):
-                        switch_mode = 'f'
-                        break
-                    elif chan_num == (len(keys) + 1):
-                        switch_mode = 's'
-                        break
             except:
                 pass
 
-        if switch_mode != '' or (mode == "favs" and ctrl_char == 'f') or(mode == "soma" and ctrl_char == 's') or (mode == "difm" and ctrl_char == 'd'):
+        if switch_mode != '' or (mode == "favs" and ctrl_char == 'f') or (mode == "soma" and ctrl_char == 's'):
             continue
 
         (term_w, term_h) = resetDimensions()

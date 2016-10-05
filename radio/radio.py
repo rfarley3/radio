@@ -128,29 +128,18 @@ VOL = "11000"  # volume 0 .. 32k
 # <stream URL>,<stream name>,<stream_img_url>
 SOMA_CHAN_FILENAME = ".somachannels.csv"
 CHAN_AGE_LIMIT = 7  # in days, maximum age of the channel file before rebuilding it
-DIFM_PARSE_URL = "http://pub5.di.fm/"
-DIFM_CHAN_FILENAME = ".difmchannels.csv"
 FAVS_CHAN_FILENAME = ".favchannels.csv"  # manually updated
 # Here is the default/recommended .favchannels.csv:
 FAVS_DEFAULT = """
 http://www.ibiblio.org/wcpe/wcpe.pls,WCPE Classical,"TheClassicalStation.org from Wake Forest, NC",http://theclassicalstation.org/images/wcpe_footer.jpg
-http://ice.somafm.com/events,DEF CON Radio,Music for Hacking; from DEF CON 22 in Las Vegas,http://somafm.com/img/defcon120.png
+http://ice1.somafm.com/defcon-128-mp3,DEF CON Radio,Music for Hacking; from DEF CON 22 in Las Vegas,http://somafm.com/img/defcon120.png
 http://ice.somafm.com/groovesalad,Groove Salad,Nice chill plate of ambient/downtempo beats and grooves,http://somafm.com/img/groovesalad120.png
 http://broadcast.wnrn.org:8000/wnrn.mp3,WNRN Cville,"Charlottesville, VA Independent Radio",http://www.wnrn.org/wp-content/themes/WNRN/images/logo2.gif
 http://ice.somafm.com/bagel,BAGeL Radio,What alternative rock radio should sound like,http://somafm.com/img/bagel120.png
 http://ice.somafm.com/folkfwd,Folk Forward,"Indie, Alt, and Classic folk",http://somafm.com/img/folkfwd120.jpg
-http://pub5.di.fm/di_trance,Trance,"Di.FM: simply the best, we can't define it",
 http://ice.somafm.com/lush,Lush,"Electronica with sensuous/mellow vocals, mostly female",http://somafm.com/img/lush-x120.jpg
-http://pub5.di.fm/di_vocaltrance,Vocal Trance,"Fusion of trance, dance, and chilling vocals",
-http://pub5.di.fm/di_vocalchillout,Vocal Chillout,Enjoy the relaxing vocal sounds of ibiza chillout,
 http://ice.somafm.com/suburbsofgoa,Suburbs of Goa,Desi-influenced Asian world beats and beyond,http://somafm.com/img/sog120.jpg
-http://pub5.di.fm/di_ambient,Ambient,"Blend of ambient, downtempo, and chillout",
-http://pub5.di.fm/di_psybient,Psybient,Psychedelic takes on Ambient,
 http://ice.somafm.com/u80s,Underground 80s,Early 80s UK Synthpop and a bit of New Wave,http://somafm.com/img/u80s-120.png
-http://pub5.di.fm/di_classictrance,Classic Trance,Relive classic trance hits,
-http://pub5.di.fm/di_epictrance,Epic Trance,Epic & uplifting trance hits,
-http://pub5.di.fm/di_eurodance,EuroDance,Newest and best of Eurodance hits,
-http://pub5.di.fm/di_house,House,Silky deep house music direct from NYC,
 """
 
 # page to parse for channel urls, names, and descriptions
@@ -272,52 +261,6 @@ def buildSomaChannelFile(outfile):
     chan_writer.writerow(['http://broadcast.wnrn.org:8000/wnrn.mp3', 'WNRN Cville', 'Independent Radio', 'http://www.wnrn.org/wp-content/themes/WNRN/images/logo2.gif'])
     csv_chan_file.close()
     return
-
-
-def buildDifmChannelFile(outfile):
-    # old way to get the streams:
-    #   di.fm urls are at http://pastebin.com/i95PnyxJ for the pls files, then pull one url out of pls to use
-    #   http://listen.di.fm/public3
-    #   chan_writer.writerow(['http://pub8.di.fm:80/di_trance', 'di.fm Trance', 'Digitally Imported', 'http://api.audioaddict.com/v1/assets/image/befc1043f0a216128f8570d3664856f7.jpg?size=200x200&quality=90'])
-    # ### better way:
-    from urllib.request import urlopen
-    page = urlopen(DIFM_PARSE_URL)
-    page_str = bytes.decode(page.read())
-    # page = bytes.decode(urlopen(DIFM_PARSE_URL).read())
-    # mp += re.findall('<h3>Mount Point /(.*?)</h3>', page)
-    # mp = re.findall('<h3>Mount Point /([^<]*)</h3>', page)
-    # mp = re.findall('<h3>Mount Point /([^_]*_[^_]*)</h3>', page)
-    # st = re.findall('Stream Title:</td><td class="streamdata">(.*?)</td>', page)
-    # st = re.findall('Stream Title:</td><td class="streamdata">([^<]*)</td>', page)
-    # print(page_str[0:1000])
-    import re
-    mp = re.findall('<h3>Mount Point /([^_]*_[^_]*)</h3></td><td[^<]*<a[^<]*</a><a[^<]*</a></td></tr></table></div><table[^<]*><tr><td>Stream Title:</td><td class="streamdata">([^<]*)</td>', page_str)
-    # for x in mp:
-    #    print("match: " + str(x))
-
-    # no album/station images in this page
-    # imgs = re.findall('<img src="([^"]*)"', page)
-    # for x in imgs:
-    #    print("match: " + str(x))
-
-    print("Building new channels file from Di.FM...")
-    csv_chan_file = open(outfile, 'w', newline='')  # per doc to avoid TypeError: 'str' does not support the buffer interface
-    chan_writer = csv.writer(csv_chan_file)
-
-    chans = 0
-    for index, tup in enumerate(mp, start=1):
-        stream_url, stream_desc = tup
-        stream_url = DIFM_PARSE_URL + stream_url
-        stream_desc = re.sub(' DIGITALLY IMPORTED -', '', stream_desc)
-        stream_desc = re.sub('&amp;', '&', stream_desc)
-        stream_name = stream_desc.split('-')[0].strip()
-        stream_desc = stream_desc.split('-')[1].strip()
-        csv_row = [stream_url, stream_name, stream_desc, ""]
-        chan_writer.writerow(csv_row)
-        print("  %s, %s, %s" % (stream_url, stream_name, stream_desc))
-        chans = chans + 1
-    csv_chan_file.close()
-    return chans
 
 
 def randFont():
@@ -480,12 +423,6 @@ def getStations(filename, mode):
             # sys.exit(1)
         elif mode == "soma":
             buildSomaChannelFile(filename)
-        elif mode == "difm":
-            chans = buildDifmChannelFile(filename)
-            if chans == 0:
-                os.system("cp " + filename + ".bck " + filename)
-                with colors("red"):
-                    print("Warning: buildDifmChannelFile failure, restoring from .bck")
         with colors("red"):
             print("Finished building channel file")  # ", please run again."
         # one last try to open the rebuilt file
@@ -542,7 +479,7 @@ def printStations(chans, term_w, mode):
     # gen_line_cnt = line_cnt
 
     # print the hard coded access to the other station files pt 1
-    if mode == "soma" or mode == "difm":
+    if mode == "soma":
         with colors("yellow"):
             sys.stdout.write(" %2d" % len(keys) + " ) Favorites" + ' ' * (name_len - len("Favorites")))
         with colors("green"):
@@ -558,28 +495,6 @@ def printStations(chans, term_w, mode):
         with colors("green"):
             lines = []
             lines = textwrap.wrap("Enter " + str(len(keys)) + " or 's' to show SomaFM channels", desc_len - 6)
-            line_cnt += len(lines)
-            print(lines[0])
-            for line in lines[1:]:
-                print(' ' * (name_len + 6) + line)
-
-    # print the hard coded access to the other station files pt 2
-    if mode == "soma" or mode == "favs":
-        with colors("yellow"):
-            sys.stdout.write(" %2d" % (len(keys) + 1) + " ) Di.FM" + ' ' * (name_len - len("Di.FM")))
-        with colors("green"):
-            lines = []
-            lines = textwrap.wrap("Enter " + str(len(keys) + 1) + " or 'd' to show Di.FM channels", desc_len - 6)
-            line_cnt += len(lines)
-            print(lines[0])
-            for line in lines[1:]:
-                print(' ' * (name_len + 6) + line)
-    elif mode == "difm":
-        with colors("yellow"):
-            sys.stdout.write(" %2d" % (len(keys) + 1) + " ) SomaFM" + ' ' * (name_len - len("SomaFM")))
-        with colors("green"):
-            lines = []
-            lines = textwrap.wrap("Enter " + str(len(keys) + 1) + " or 's' to show SomaFM channels", desc_len - 6)
             line_cnt += len(lines)
             print(lines[0])
             for line in lines[1:]:
