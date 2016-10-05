@@ -161,7 +161,7 @@ FAVS_CHAN_FILENAME = ".favchannels.csv"  # manually updated
 # Here is the default/recommended .favchannels.csv:
 FAVS_DEFAULT = """
 http://www.ibiblio.org/wcpe/wcpe.pls,WCPE Classical,"TheClassicalStation.org from Wake Forest, NC",http://theclassicalstation.org/images/wcpe_footer.jpg
-http://ice1.somafm.com/defcon-128-mp3,DEF CON Radio,Music for Hacking; from DEF CON 22 in Las Vegas,http://somafm.com/img/defcon120.png
+http://ice.somafm.com/defcon,DEF CON Radio,Music for Hacking,http://somafm.com/img/defcon120.png
 http://ice.somafm.com/groovesalad,Groove Salad,Nice chill plate of ambient/downtempo beats and grooves,http://somafm.com/img/groovesalad120.png
 http://broadcast.wnrn.org:8000/wnrn.mp3,WNRN Cville,"Charlottesville, VA Independent Radio",http://www.wnrn.org/wp-content/themes/WNRN/images/logo2.gif
 http://ice.somafm.com/bagel,BAGeL Radio,What alternative rock radio should sound like,http://somafm.com/img/bagel120.png
