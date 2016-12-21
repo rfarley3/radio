@@ -14,24 +14,25 @@ if PY3:
 else:
     get_input = raw_input
 
-from .radio import (
+from . import (
     BANNER,
     FAVS_CHAN_FILENAME,
     SOMA_CHAN_FILENAME,
+)
+from .radio import (
     resetDimensions,
     asciiArtText,
-    colors,
     getStations,
     printStations,
     printAsciiArt,
     playStation,
     deletePromptChars)
+from .color import colors
 
 
-USAGE = """Usage %s [-h|--help|-s|--soma] [--proxy <url>]
+USAGE = """Usage %s [-h|--help|-s|--soma]
 \t-h or --help\tThis help message
 \t-s or --soma\tRun in SomaFM mode
-\t-x or --proxy\tSet the proxy server
 
 Python script for direct listening to online music streams.
 Built-in compatibility with SomaFM.
@@ -58,7 +59,7 @@ def main():
     mode = "favs"
     chan_filename = FAVS_CHAN_FILENAME
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hsdx:", ["help", "soma", "proxy="])
+        opts, args = getopt.getopt(sys.argv[1:], "hs:", ["help", "soma"])
     except getopt.GetoptError:
         usage()
     for opt, arg in opts:
@@ -66,9 +67,6 @@ def main():
         if opt in("-s", "--soma"):
             mode = "soma"
             chan_filename = SOMA_CHAN_FILENAME
-        elif opt in("-x", "--proxy"):
-            PROXY = arg
-            # print("Using proxy " + PROXY)
         elif opt in("-h", "--help"):
             usage()
         else:
