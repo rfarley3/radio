@@ -21,13 +21,12 @@ from . import (
 )
 from .radio import (
     resetDimensions,
-    asciiArtText,
     getStations,
     printStations,
-    printAsciiArt,
     playStation,
     deletePromptChars)
 from .color import colors
+from .banner import bannerize
 
 
 USAGE = """Usage %s [-h|--help|-s|--soma]
@@ -45,7 +44,7 @@ And let's not forget the pretty ASCII art...
 def usage():
     print(USAGE % sys.argv[0])
     (term_w, term_h) = resetDimensions()
-    (banner, font) = asciiArtText("ASCII Art, FTW!", term_w)
+    (banner, font) = bannerize("ASCII Art, FTW!", term_w)
     with colors("purple"):  # or blue, green, yellow, red
         print(banner)
     print("Font: " + font)
@@ -104,7 +103,7 @@ def main():
         elif mode == "soma":
             title = "SomaFM Tuner"
         with colors("red"):
-            (banner, font) = asciiArtText(title, term_w)
+            (banner, font) = bannerize(title, term_w)
             b_IO = StringIO(banner)
             b_h = len(b_IO.readlines())
             print(banner)  # , end='')
@@ -170,7 +169,7 @@ def main():
             (term_w, term_h) = resetDimensions()
             font = "unknown"
             with colors("yellow"):
-                (banner, font) = asciiArtText(chans[chan_num][1], term_w)
+                (banner, font) = bannerize(chans[chan_num][1], term_w)
                 b_IO = StringIO(banner)
                 b_height = len(b_IO.readlines())
                 if term_h > (b_height + 3):  # Playing, Station Name, Song Title

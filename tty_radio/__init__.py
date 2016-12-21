@@ -5,7 +5,8 @@ VOL = "11000"  # volume 0 .. 32k
 # CSV file format
 # <stream URL>,<stream name>,<stream_img_url>
 SOMA_CHAN_FILENAME = ".somachannels.csv"
-CHAN_AGE_LIMIT = 7  # in days, maximum age of the channel file before rebuilding it
+# maximum age of the channel file before rebuilding it
+CHAN_AGE_LIMIT = 7  # in days
 FAVS_CHAN_FILENAME = ".favchannels.csv"  # manually updated
 # Here is the default/recommended .favchannels.csv:
 FAVS_DEFAULT = """
@@ -18,7 +19,7 @@ http://ice.somafm.com/folkfwd,Folk Forward,"Indie, Alt, and Classic folk",http:/
 http://ice.somafm.com/lush,Lush,"Electronica with sensuous/mellow vocals, mostly female",http://somafm.com/img/lush-x120.jpg
 http://ice.somafm.com/suburbsofgoa,Suburbs of Goa,Desi-influenced Asian world beats and beyond,http://somafm.com/img/sog120.jpg
 http://ice.somafm.com/u80s,Underground 80s,Early 80s UK Synthpop and a bit of New Wave,http://somafm.com/img/u80s-120.png
-"""
+"""  # noqa
 
 # page to parse for channel urls, names, and descriptions
 SOMA_PARSE_URL = "http://somafm.com"
@@ -34,7 +35,8 @@ SOMA_PARSE_URL = "http://somafm.com"
 # from other links on somafm site:
 #   http://somafm.com/play/<NAME>
 #   but this doesn't load in mpg123 at all
-# mpg123 can handle the "direct links", but to parse for these would require requesting each channel's directstreamlinks.html
+# mpg123 can handle the "direct links", but to parse for these would
+# require requesting each channel's directstreamlinks.html
 SOMA_STREAM_BASE_URL = "http://ice.somafm.com/"
 SOMA_STREAM_END_URL  = ""
 
