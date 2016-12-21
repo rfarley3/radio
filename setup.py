@@ -1,12 +1,12 @@
 from setuptools import setup
 
 setup(
-    name='pyradio',
-    version='0.0.1',
+    name='tty_radio',
+    version='0.1.4',
     description="Terminal player for online radio streams.",
     author='rfarley3',
     author_email='rfarley3@gmu.edu',
-    packages=['pyradio'],
+    packages=['tty_radio'],
     install_requires=[
         'beautifulsoup4',
         'pyfiglet',
