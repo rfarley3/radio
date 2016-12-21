@@ -234,7 +234,7 @@ def asciiArtText(str, term_w):
         if not PYFIG:
             return(out, fi)
         fi = randFont()
-        f = pyfiglet.Figlet(font=fi)  # , width=term_w )
+        f = pyfiglet.Figlet(font=fi, width=term_w)
         out = f.renderText(str)
         out_IO = StringIO(out)
         out_width = max([len(a) for a in out_IO.readlines()])
