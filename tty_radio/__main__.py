@@ -164,7 +164,9 @@ def main():
         # call player
         if chans[chan_num][3] != "":
             print("ASCII Printout of Station's Logo:")
-            print(gen_art(chans[chan_num][3], term_w, term_h))
+            art = gen_art(chans[chan_num][3], term_w, term_h)
+            if art is not None:
+                print(art)
         unhappy = True
         while unhappy:
             (term_w, term_h) = resetDimensions()

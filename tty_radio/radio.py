@@ -98,7 +98,9 @@ def buildSomaChannelFile(outfile):
         chan_writer.writerow(csv_row)
         # os.system('cls' if os.name == 'nt' else 'clear')  # so ascii art gets a page each
         print("  %s, %s, %s" % (stream_url, stream_name, stream_desc))
-        print(gen_art(stream_img, 80, 40))
+        art = gen_art(stream_img, 80, 40)
+        if art is not None:
+            print(art)
     # add in some other manual ones
     # https://theclassicalstation.org/internet.shtml
     # http://audio-mp3.ibiblio.org:8000/wcpe.mp3 <- direct
