@@ -33,16 +33,7 @@ import os
 import subprocess
 import re
 import math
-from bisect import bisect
 from bs4 import BeautifulSoup
-from io import BytesIO
-
-PYPILLOW = False
-try:
-    from PIL import Image
-except:
-    PYPILLOW = False
-    print("Hey-o, you don't have image manipulation libs installed: pip install pillow")
 if PY3:
     from urllib.request import urlopen
 else:
@@ -59,9 +50,8 @@ from . import (
     SOMA_STREAM_END_URL
 )
 from .color import colors
-from .banner import (
-    bannerize,
-)
+from .banner import bannerize
+from .album import gen_art
 
 
 def buildFavsChannelFile(outfile):
@@ -108,7 +98,7 @@ def buildSomaChannelFile(outfile):
         chan_writer.writerow(csv_row)
         # os.system('cls' if os.name == 'nt' else 'clear')  # so ascii art gets a page each
         print("  %s, %s, %s" % (stream_url, stream_name, stream_desc))
-        printAsciiArt(stream_img, 80, 40)
+        print(gen_art(stream_img, 80, 40))
     # add in some other manual ones
     # https://theclassicalstation.org/internet.shtml
     # http://audio-mp3.ibiblio.org:8000/wcpe.mp3 <- direct
@@ -116,74 +106,6 @@ def buildSomaChannelFile(outfile):
     # goto http://www.wnrn.org/listen/ get link at "Load Stream" drop the final .m3u(or look at file at URL contents)
     chan_writer.writerow(['http://broadcast.wnrn.org:8000/wnrn.mp3', 'WNRN Cville', 'Independent Radio', 'http://www.wnrn.org/wp-content/themes/WNRN/images/logo2.gif'])
     csv_chan_file.close()
-    return
-
-
-def printAsciiArt(url, term_w, term_h):
-    # Creates an ascii art image from an arbitrary image
-    # orig author: Steven Kay 7 Sep 2009
-    # mod by x0rion Feb 2014
-    # print("Printing ASCII Art for " + url)
-    if not PYPILLOW:
-        return
-    im_height = term_h - 5  # leave room for other output
-    if term_w < (term_h * 2):  # optimal image is 2x wider than higher, make sure it can fit in term
-        im_height = int(term_w / 2)
-    im_width = im_height * 2  # im_width <= term_w, bc im_w=term_w/2*2 = (im_w=im_h*2 and im_h=term_w/2)
-    if im_height < 25:
-        print("Not drawing art until terminal gets bigger(im_h >= 25)")
-        print("(w,h) im: (%d,%d) term: (%d,%d)" % (im_width, im_height, term_w, term_h))
-        return
-
-    # greyscale.. the following strings represent
-    # 7 tonal ranges, from lighter to darker.
-    # for a given pixel tonal level, choose a character
-    # at random from that range.
-    greyscale = [" ",
-                 " ",
-                 "-",      # ".,-",
-                 "=~+*",   # "_ivc=!/|\\~",
-                 "[]()",   # "gjez2]/(YL)t[+T7Vf",
-                 "mdbwz",  # "mdK4ZGbNDXY5P*Q",
-                 "WKMA",
-                 "#@$&"    # "#%$"
-                 ]
-
-    # using the bisect class to put luminosity values
-    # in various ranges.
-    # these are the luminosity cut-off points for each
-    # of the 7 tonal levels. At the moment, these are 7 bands
-    # of even width, but they could be changed to boost
-    # contrast or change gamma, for example.
-
-    zonebounds = [36, 72, 108, 144, 180, 216, 252]
-
-    # open image and resize
-    try:
-        image = urlopen(url).read()
-    except:
-        print("Warning: couldn't retrieve file" + url)
-        return
-
-    im = Image.open(BytesIO(image))
-    # experiment with aspect ratios according to font
-    #   w , h
-    # im=im.resize((160, 75),Image.BILINEAR)
-    im = im.resize((im_width, im_height), Image.BILINEAR)
-    im = im.convert("L")  # convert to mono
-
-    # now, work our way over the pixels
-    # build up str
-    str_ = ""
-    for y in range(0, im.size[1]):
-        for x in range(0, im.size[0]):
-            lum = 255 - im.getpixel((x, y))
-            row = bisect(zonebounds, lum)
-            possibles = greyscale[row]
-            str_ = str_ + possibles[random.randint(0, len(possibles) - 1)]
-        if y != (im.size[1] - 1):
-            str_ = str_ + "\n"
-    print(str_)
     return
 
 

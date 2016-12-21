@@ -27,6 +27,7 @@ from .radio import (
     deletePromptChars)
 from .color import colors
 from .banner import bannerize
+from .album import gen_art
 
 
 USAGE = """Usage %s [-h|--help|-s|--soma]
@@ -163,7 +164,7 @@ def main():
         # call player
         if chans[chan_num][3] != "":
             print("ASCII Printout of Station's Logo:")
-            printAsciiArt(chans[chan_num][3], term_w, term_h)
+            print(gen_art(chans[chan_num][3], term_w, term_h))
         unhappy = True
         while unhappy:
             (term_w, term_h) = resetDimensions()
