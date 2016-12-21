@@ -10,7 +10,6 @@ setup(
     install_requires=[
         'beautifulsoup4',
         'pyfiglet',
-        'pillow',
     ],
     entry_points={
         'console_scripts': [
