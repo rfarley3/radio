@@ -4,29 +4,21 @@ PY3 = False
 if platform.python_version().startswith('3'):
     PY3 = True
 ########################################
-# x0rion Feb 2014
-# SomaFM, Di.FM, WCPE (TheClassicalStation.org) terminal client
+# Streaming radio terminal client
+# v0.1.4           Convert to pyradio
 # v0.1.3 25Sep2014 Added proxy support
 # v0.1.2  7Aug2014 Added favs
 # v0.1.1  6Mar2014 Added Di.FM
-#
-# First version based on: https://gist.github.com/roamingryan/2343819
-# Significantly modified
-# Coded for Python3
-#    macports makes this easy, but otherwise you will need to download the binary or source and compile (requires Xcode tools)
-#    be sure to change shebang to the correct path:
-#    e.g. #!/usr/local/bin/python3 OR ln -s /usr/local/bin/python3 /usr/bin/python3 and then #!/usr/bin/python3
-#    if you used macports, then it's in /opt/local/bin/python
+# v0.0.0           based on https://gist.github.com/roamingryan/2343819
 # Designed to use mpg123, but you can use any player that doesn't buffer stdout
-#    if you use macports, then port install mpg123
-#    for osx you can just download latest or compile from source (requires Xcode tools)
-#    tested with version 1.20.1 from source
+#    if you use macports: `port install mpg123`
+#    tested with mpg123 version 1.20.1 from source
 # Don't miss out on the pretty
 #    install pyfiglet for ASCII art Banners
 #    install pillow for ASCII art Station ID Cover Art
 #
 # To use:
-#   run ./radio or ./radio -h to see all the argument options
+#   run radio or radio -h to see all the argument options
 #   select station at prompt, by number in left column
 #   enjoy
 #
