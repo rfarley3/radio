@@ -21,13 +21,13 @@ from . import (
 )
 from .radio import (
     resetDimensions,
-    getStations,
     printStations,
     playStation,
     deletePromptChars)
 from .color import colors
 from .banner import bannerize
 from .album import gen_art
+from .stationfile import get_stations
 
 
 USAGE = """Usage %s [-h|--help|-s|--soma]
@@ -77,7 +77,7 @@ def main():
 
     # ######
     # get the station list
-    chans = getStations(home + "/" + chan_filename, mode)
+    chans = get_stations(home + "/" + chan_filename, mode)
 
     # ######
     # main loop
@@ -93,7 +93,7 @@ def main():
             elif switch_mode == 's':
                 mode = "soma"
                 chan_filename = SOMA_CHAN_FILENAME
-            chans = getStations(home + "/" + chan_filename, mode)
+            chans = get_stations(home + "/" + chan_filename, mode)
             switch_mode = False
 
         # ######
