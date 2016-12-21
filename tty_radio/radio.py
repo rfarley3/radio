@@ -1,8 +1,4 @@
 from __future__ import print_function
-import platform
-PY3 = False
-if platform.python_version().startswith('3'):
-    PY3 = True
 ########################################
 # Streaming radio terminal client
 # v0.1.4           Convert to pyradio
@@ -11,11 +7,6 @@ if platform.python_version().startswith('3'):
 # v0.1.1  6Mar2014 Added Di.FM
 # v0.0.0           based on https://gist.github.com/roamingryan/2343819
 # Designed to use mpg123, but you can use any player that doesn't buffer stdout
-#    if you use macports: `port install mpg123`
-#    tested with mpg123 version 1.20.1 from source
-# Don't miss out on the pretty
-#    install pyfiglet for ASCII art Banners
-#    install pillow for ASCII art Station ID Cover Art
 #
 # To use:
 #   run radio or radio -h to see all the argument options
@@ -23,92 +14,16 @@ if platform.python_version().startswith('3'):
 #   enjoy
 #
 # TODO
-#   test on non-OSX, particularly the terminal cursor commands
 #   generate and use pls/m3u files as web-parsed storage
 #      possibly move web-scrape to CLarg and only on demand (but alert if old)
 #      detect if stations fail
 #      perhaps get direct links for Soma
 #   ability to CRUD a favorites playlist
 #
-# #### Dependencies
-# For scraping channel links from soma's website, req beautifulsoup4
-# For ascii banners, req pyfiglet; e.g.:
-"""
- _______                      _______ ___ ___  _______
-|   _   .-----.--------.---.-|   _   |   Y   ||       .--.--.-----.-----.----.
-|   1___|  _  |        |  _  |.  1___|.      ||.|   | |  |  |     |  -__|   _|
-|____   |_____|__|__|__|___._|.  __) |. \_/  |`-|.  |-|_____|__|__|_____|__|
-|:  1   |                    |:  |   |:  |   |  |:  |
-|::.. . |                    |::.|   |::.|:. |  |::.|
-`-------'                    `---'   `--- ---'  `---'
-  ______                   _______ _______    _______
- / _____)                 (_______|_______)  (_______)
-( (____   ___  ____  _____ _____   _  _  _       _ _   _ ____  _____  ____
- \____ \ / _ \|    \(____ |  ___) | ||_|| |     | | | | |  _ \| ___ |/ ___)
- _____) ) |_| | | | / ___ | |     | |   | |     | | |_| | | | | ____| |
-(______/ \___/|_|_|_\_____|_|     |_|   |_|     |_|____/|_| |_|_____)_|
-
- _______                                 _______         __           __
-|     __|.----.-----.-----.--.--.-----. |     __|.---.-.|  |.---.-.--|  |
-|    |  ||   _|  _  |  _  |  |  |  -__| |__     ||  _  ||  ||  _  |  _  |
-|_______||__| |_____|_____|\___/|_____| |_______||___._||__||___._|_____|
-
->>> Groove Salad: a nicely chilled plate of ambient beats and grooves. [SomaFM]
->>> Minot - The Cycle Of Venus
-8 8888      8 8888      88    d888888o.   8 8888        8
-8 8888      8 8888      88  .`8888:' `88. 8 8888        8
-8 8888      8 8888      88  8.`8888.   Y8 8 8888        8
-8 8888      8 8888      88  `8.`8888.     8 8888        8
-8 8888      8 8888      88   `8.`8888.    8 8888        8
-8 8888      8 8888      88    `8.`8888.   8 8888        8
-8 8888      8 8888      88     `8.`8888.  8 8888888888888
-8 8888      ` 8888     ,8P 8b   `8.`8888. 8 8888        8
-8 8888        8888   ,d8P  `8b.  ;8.`8888 8 8888        8
-8 888888888888 `Y88888P'    `Y8888P ,88P' 8 8888        8
-
-Press enter if you like banner, else any char then enter
->>> Lush: Mostly female vocals with an electronic influence. [SomaFM]
->>> Miaow - Tempered Song
-"""
-# For ascii art, req pillow; e.g.:
-"""
-http://ice.somafm.com/cliqhop, cliqhop idm, Blips'n'beeps backed mostly w/beats. Intelligent Dance Music.
-----------------------------------------------------------------------
------------------KA ----------- ---------------------------------~=---
------   -  ))  A-  W      (-  M                 ------------=A-   -- ~
----+M  =- ~A  MK  [(  ]   A      M   ]  K]  -   ]--------K          -(
----M  KK- A) -A  ]K  MK  A- [K   ~ -W[  M   M  ) --AMW*K --         -K
- --  [KWW MWMMMWK- (K[  MAAMKWKKK (KKW- ~ (MA[( --]          =][)  -=-
-M((]~[[+  -]) ------](()- ------*----- A]]( +-)[)M     -+K)=    - - (-
-[W]------[-KMW-)W-~-------------------------M- )-     K    [-   K ]A--
----------------~-A- W] ------------------- ] *=     -      (   ] M-~ =
---------------------W K[-=-------------------M-    -      (   ( (* ~+-
------------------------W ( )----------------M     -   K  [   MW+  M-+K
------------------------- -+(W)+------------M     ) ( ]  [   (K    =-K-
---------------------------- [](-M--------+*        W  W   ~]] -  ][(--
-------------------------------([) (--------[(     )[-    = A](  [A)K--
-M[ ------------------------------] W=----)W)]-A        -M=-M  ) (K)A--
-K-M--------------------------------A A- [==-~- WM     ~-++**~-W+] (](M
-M([ K --------------(~([]-----------+M*K]   *==+  M  ]-*~~*++A-]-=[*))
---- M] K+ --~-M  =][][[(][)- [)([=---(~]       -=*--=-]---------------
-------(M= [((--*------------- -(] *[~(    ]) WA    ()~ M--------------
------------W[*--(]--------------- W]+[   ]        W+  + --------------
-------------+~](AM~K-------------W  -   -           ] [---------------
---------------*( W ~[[)---------W                 - )W([[~-*----------
---------------- WA W) =------- M      -M          *=-[~[([-*][]- --(=-
-----------+(-(--- *[= ++------K        (        ]M [----------------*
--------- M( *A+][KW)(M=[-[ (~)             (M  [  K-A[ ---------------
-------WK K (-      -K(----(A](]=M(             - M -A(~A [~-----------
----- AA-A=+ -[K)-[+A( -----W     -))[  ([~](    A ----- -[+]][[~- -[+-
--~A K  -*--[K]---- [--------]          -([A))( -[)-----~=([AM(=M~)]W*
----A* W~ M+W--------[+M ----[ AW[              [--W  -*+(K=W--K[M[-([-
-      WM- A         +(- K  ) -+=- [MA-       W+    AMWWKA  [  WM])
-----------       -     +--~- ~ +**~~~+--***-~-- * ~-- -----K(+W -[-]-+
--+- +]])]))()()]-W)       -]- =  --+-      --*~ +- =---* ]])])))(]]) ]
-  (]])([)])[*   -    )[]--      ~ -- +--= ==+- =- =- *- )]))[=-
-][]))(( -A             )[)+-     ~ -+= *--- -~ *=~=+ ~~ - K))[])((*~=-
-  A]][[) --*-----=~++]]+(]]]+*[ *  - ~~--   --~*+* +=* ~~ -- -)])[([))
-"""
+import platform
+PY3 = False
+if platform.python_version().startswith('3'):
+    PY3 = True
 import csv
 import sys
 import textwrap
@@ -130,7 +45,7 @@ except ImportError:
     print("Hey-o, you don't have ascii art banner libs installed: pip install pyfiglet")
 PYPILLOW = False
 try:
-    from PIL import Image  # pip install pillow
+    from PIL import Image
 except:
     PYPILLOW = False
     print("Hey-o, you don't have image manipulation libs installed: pip install pillow")
