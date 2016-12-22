@@ -31,8 +31,6 @@ def usage():
 
 
 def main(args=sys.argv[1:]):
-    # set term title
-    sys.stdout.write("\x1b]0;" + "~=radio tuner=~" + "\x07")
     try:
         opts, args = getopt.getopt(args, "hs:", ["help", "soma"])
     except getopt.GetoptError:
@@ -48,7 +46,14 @@ def main(args=sys.argv[1:]):
         else:
             usage()
             return 1
-    radio(mode)
+    # set term title
+    sys.stdout.write("\x1b]0;" + "~=radio tuner=~" + "\x07")
+    try:
+        radio(mode)
+    except KeyboardInterrupt:
+        pass
+    # clear term title
+    sys.stdout.write("\x1b]0;" + "\x07")
     return 0
 
 

@@ -13,7 +13,7 @@ else:
 PYPILLOW = False
 try:
     from PIL import Image
-except:
+except ImportError:
     PYPILLOW = False
     print("Hey-o, you don't have image manipulation libs installed:")
     print("  pip install pillow")
@@ -64,7 +64,7 @@ def gen_art(url, term_w, term_h):
     # open image and resize
     try:
         image = urlopen(url).read()
-    except:
+    except:  # TODO get exception
         print("Warning: couldn't retrieve file" + url)
         return
 

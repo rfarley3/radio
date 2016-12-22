@@ -47,7 +47,7 @@ from .album import gen_art
 from .stationfile import get_stations
 
 
-def printStations(chans, term_w, mode):
+def print_stations(chans, term_w, mode):
     keys = list(chans.keys())
     line_cnt = 0
     if len(keys) == 0:
@@ -101,7 +101,7 @@ def printStations(chans, term_w, mode):
     return(keys, line_cnt - 1)
 
 
-def playStation(url, prefix, show_deets=1):
+def play_station(url, prefix, show_deets=1):
     # mpg123 command line mp3 stream player, does unbuffered output, so the subprocess...readline snip works
     # -C allows keyboard presses to send commands: space is pause/resume, q is quit, +/- control volume
     # -@ tells it to read (for stream/playlist info) filenames/URLs from within the file located at the next arg
@@ -136,7 +136,7 @@ def playStation(url, prefix, show_deets=1):
             title_m = title_re.search(out)
             try:
                 song_title = title_m.group(1)
-            except:
+            except:  # TODO find actual exception
                 song_title = "Song title didn't parse(" + out + ")"
             # confine song title to single line to look good
             (term_w, term_h) = term_hw()
@@ -145,8 +145,8 @@ def playStation(url, prefix, show_deets=1):
             # this will delete the last song, and reuse its line (so output only has one song title line)
             if COMPACT_TITLES:
                 if has_titled:
-                    # deleteChars(delete_cnt)
-                    deletePromptChars(delete_cnt)
+                    # del_chars(delete_cnt)
+                    del_prompt(delete_cnt)
                 else:
                     has_titled = True
                 print(prefix + song_title)  # , end='')
@@ -157,7 +157,7 @@ def playStation(url, prefix, show_deets=1):
     return delete_cnt
 
 
-def deleteChars(num_chars):
+def del_chars(num_chars):
     print('\b' * num_chars, end='')  # move cursor to beginning of text to remove
     print(' '  * num_chars, end='')  # overwrite/delete all previous text
     print('\b' * num_chars, end='')  # reset cursor for new text
@@ -166,7 +166,7 @@ def deleteChars(num_chars):
 
 # \033[A moves cursor up 1 line; ' ' overwrites text, '\b' resets cursor to start of line
 # if the term is narrow enough, you need to go up multiple lines
-def deletePromptChars(num_chars):
+def del_prompt(num_chars):
     # determine lines to move up, there is at least 1 bc user pressed enter to give input
     # when they pressed Enter, the cursor went to beginning of the line
     (term_w, term_h) = term_hw()
@@ -179,34 +179,72 @@ def term_hw():
     try:
         # *nix get terminal/console width
         rows, columns = os.popen('stty size', 'r').read().split()
+    except:  # TODO get actual exeption
+        return (80, 40)
+    try:
         width  = int(columns)
         height = int(rows)
         return (width, height)
         # print("term width: %d"% width)
-    except:
+    except ValueError:
         return (80, 40)
+
+
+def get_chan(mode, keys):
+    # ######
+    # get user input
+    #     if next_mode != '':
+    #     if next_mode == 'f':
+    #         mode = 'favs'
+    #     elif next_mode == 's':
+    #         mode = 'soma'
+    # next_mode = ''
+    chan_num = None
+    while chan_num not in keys:
+        try:
+            chan_num = get_input("\nPlease select a channel [q to quit]: ")
+        except SyntaxError:
+            continue
+        if not chan_num:
+            continue
+        chan_num = str(chan_num).strip().lower()
+        if len(chan_num) == 0:
+            continue
+        try:
+            chan_num = int(chan_num)
+            if chan_num < len(keys):
+                return (chan_num, None)
+            # the final row is not a stream, but a mode change
+            if mode == 'favs' and chan_num == len(keys):
+                return (None, 'soma')
+            if mode == 'soma' and chan_num == len(keys):
+                return (None, 'favs')
+        except ValueError:
+            pass
+        ctrl_char = chan_num[0]
+        if ctrl_char not in ['q', 'e', 's', 'f']:
+            continue
+        if (ctrl_char == 'q' or ctrl_char == 'e'):
+            return (None, 'q')
+        if ctrl_char == 'f':
+            return (None, 'favs')
+        if ctrl_char == 's':
+            return (None, 'soma')
+    # should never be here
 
 
 def radio(mode):
     """list possible stations, read user input, and call player"""
     # when the player is exited, this loop happens again
-    switch_mode = ''
     while(1):
         (term_w, term_h) = term_hw()
-        if switch_mode != '':
-            if switch_mode == 'f':
-                mode = 'favs'
-            elif switch_mode == 's':
-                mode = 'soma'
         chans = get_stations(mode)
-        switch_mode = ''
-
         # ######
         # print stations
         title = "unknown"
-        if mode == "favs":
+        if mode == 'favs':
             title = "Radio Tuner"
-        elif mode == "soma":
+        elif mode == 'soma':
             title = "SomaFM Tuner"
         with colors("red"):
             (banner, font) = bannerize(title, term_w)
@@ -214,59 +252,21 @@ def radio(mode):
             b_h = len(b_IO.readlines())
             print(banner)  # , end='')
             b_h += 1
-        (keys, line_cnt) = printStations(chans, term_w, mode)
+        (keys, line_cnt) = print_stations(chans, term_w, mode)
         loop_line_cnt = line_cnt + b_h + 2
         loop_line_cnt += 1
         if term_h > loop_line_cnt:
             print('\n' * (term_h - loop_line_cnt - 1))
-
-        # ######
-        # get user input
-        switch_mode = ''
-        chan_num = None
-        while chan_num not in keys:
-            try:
-                chan_num = get_input("\nPlease select a channel [q to quit]: ")
-            except SyntaxError:
-                chan_num = ''
-            except KeyboardInterrupt:
-                return 0
-            chan_num = str(chan_num)
-            if len(chan_num) > 0:
-                chan_num = chan_num.lower()
-                ctrl_char = chan_num[0]
-                if(ctrl_char == 'q' or ctrl_char == 'e'):
-                    sys.stdout.write("\x1b]0;" + "\x07")
-                    return 0
-                # they type in some variant of either somafm or favs
-                if ctrl_char == mode[0]:
-                    break
-                elif mode == "favs" and ctrl_char == 's':
-                    switch_mode = ctrl_char
-                    break
-                elif mode == "soma" and ctrl_char == 'f':
-                    switch_mode = ctrl_char
-                    break
-            try:
-                chan_num = int(chan_num)
-                if mode == "favs":
-                    if chan_num == len(keys):
-                        switch_mode = 's'
-                        break
-                if mode == "soma":
-                    if chan_num == len(keys):
-                        switch_mode = 'f'
-                        break
-            except:
-                pass
-
-        if switch_mode != '' or (mode == "favs" and ctrl_char == 'f') or (mode == "soma" and ctrl_char == 's'):
+        (chan_num, mode) = get_chan(mode, keys)
+        if mode == 'q':
+            return
+        # no chan given, must have been a mode change, refresh list
+        if chan_num is None:
             continue
-
-        (term_w, term_h) = term_hw()
 
         # ######
         # call player
+        (term_w, term_h) = term_hw()
         if chans[chan_num][3] != "":
             print("ASCII Printout of Station's Logo:")
             art = gen_art(chans[chan_num][3], term_w, term_h)
@@ -289,7 +289,7 @@ def radio(mode):
                     happiness = get_input(prompt)
                 except SyntaxError:
                     happiness = ''
-                deletePromptChars(len(prompt) + len(happiness))
+                del_prompt(len(prompt) + len(happiness))
                 if len(happiness) == 0:
                     unhappy = False
                     msg1 = "Playing station, enjoy..."
@@ -306,8 +306,8 @@ def radio(mode):
         while replay:
             with colors("blue"):
                 prefix = ">>> "
-                delete_cnt = playStation(chans[chan_num][0], prefix, show_station_deets)
-                deletePromptChars(delete_cnt)
+                delete_cnt = play_station(chans[chan_num][0], prefix, show_station_deets)
+                del_prompt(delete_cnt)
             with colors("purple"):
                 # it will reach here anytime the player stops executing (eg it has an exp, failure, etc)
                 # but ideally it'll only reach here when the user presses q (exiting the player) to "pause" it
@@ -323,7 +323,7 @@ def radio(mode):
                     # for prettiness we don't want to reprint the station details (name, etc) upon replaying within this loop
                     show_station_deets = False
                     # we also want to get rid of that prompt to make room for the song name data again
-                    deletePromptChars(len(prompt) + len(prefix))
+                    del_prompt(len(prompt) + len(prefix))
                     sys.stdout.flush()
                     # this play->pause->loop should never accumulate lines in the output (except for the first Enter they press at a prompt and even then it's just an empty line)
             # end with

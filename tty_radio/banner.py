@@ -39,7 +39,7 @@ def rand_font():
         try:
             Figlet(font=fi)
             return fi
-        except:
+        except:  # TODO get exception for font failure
             continue
     # print(f.renderText(fi))
     # fi = "bulbhead"
