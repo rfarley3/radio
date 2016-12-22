@@ -25,6 +25,8 @@ from __future__ import print_function
 #     main menu banner
 #     menu "other stations"/station switch items
 #     custom deets filters
+#   custom colors for stations/streams
+#   use pr_blk in print_streams
 #
 import platform
 PY3 = False
@@ -182,21 +184,23 @@ def parse_song(metadata):
     return title
 
 
-def pr_blk(buf, prefix='', chomp=False, do_pr=True):
+def pr_blk(buf, prefix='', prefix_len=None, chomp=False, do_pr=True):
     if buf is None or buf == '':
         if not do_pr:
             return ''
         return
+    if prefix_len is None:
+        prefix_len = len(prefix)
     (term_w, term_h) = term_hw()
-    if chomp and len(buf) > (term_w - len(prefix)):
-        msg = prefix + buf[0:(term_w - len(prefix))]
+    if chomp and len(buf) > (term_w - prefix_len):
+        msg = prefix + buf[0:(term_w - prefix_len)]
         if not do_pr:
             return msg
         print(msg)
-    lines = textwrap.wrap(buf, term_w - len(prefix))
+    lines = textwrap.wrap(buf, term_w - prefix_len)
     msg = prefix + lines[0]
     for line in lines[1:]:
-        msg += ' ' * len(prefix) + line
+        msg += ' ' * prefix_len + line
     if not do_pr:
         return msg
     print(msg)
