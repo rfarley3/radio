@@ -291,81 +291,92 @@ def radio(mode):
         # no chan given, must have been a mode change, refresh list
         if chan_num is None:
             continue
-
         # ######
-        # call player
+        # otherwise chan num specified, so call player
+        display_album(chans[chan_num])
+        display_banner(chans[chan_num])
+        play_chan(chans[chan_num])
+
+
+def display_album(chan):
+    if chan[3] == "":
+        return
+    print("ASCII Printout of Station's Logo:")
+    (term_w, term_h) = term_hw()
+    art = gen_art(chan[3], term_w, term_h)
+    if art is not None:
+        print(art)
+
+
+def display_banner(chan):
+    unhappy = True
+    while unhappy:
         (term_w, term_h) = term_hw()
-        if chans[chan_num][3] != "":
-            print("ASCII Printout of Station's Logo:")
-            art = gen_art(chans[chan_num][3], term_w, term_h)
-            if art is not None:
-                print(art)
-        unhappy = True
-        while unhappy:
-            (term_w, term_h) = term_hw()
-            font = "unknown"
-            with colors("yellow"):
-                (banner, font) = bannerize(chans[chan_num][1], term_w)
-                b_IO = StringIO(banner)
-                b_height = len(b_IO.readlines())
-                if term_h > (b_height + 3):  # Playing, Station Name, Song Title
-                    print('\n' * (term_h - b_height - 2))
-                print(banner, end='')
-            with colors("purple"):
-                prompt = "Press enter if you like banner"
-                prompt += " (font: " + font + "), else any char then enter "
-                try:
-                    happiness = get_input(prompt)
-                except SyntaxError:
-                    happiness = ''
-                del_prompt(len(prompt) + len(happiness))
-                if len(happiness) == 0:
-                    unhappy = False
-                    msg1 = "Playing station, enjoy..."
-                    msg2 = "[pause/quit=q; vol=+/-]"
-                    if term_w > (len(msg1) + len(msg2)):
-                        print(msg1 + ' ' + msg2)
-                    else:
-                        print(msg1)
-                        print(msg2)
+        font = "unknown"
+        with colors("yellow"):
+            (banner, font) = bannerize(chan[1], term_w)
+            b_IO = StringIO(banner)
+            b_height = len(b_IO.readlines())
+            if term_h > (b_height + 3):  # Playing, Station Name, Song Title
+                print('\n' * (term_h - b_height - 2))
+            print(banner, end='')
+        with colors("purple"):
+            prompt = "Press enter if you like banner"
+            prompt += " (font: " + font + "), else any char then enter "
+            try:
+                happiness = get_input(prompt)
+            except SyntaxError:
+                happiness = ''
+            del_prompt(len(prompt) + len(happiness))
+            if len(happiness) == 0:
+                unhappy = False
+                msg1 = "Playing station, enjoy..."
+                msg2 = "[pause/quit=q; vol=+/-]"
+                if term_w > (len(msg1) + len(msg2)):
+                    print(msg1 + ' ' + msg2)
                 else:
-                    print("")  # empty line for pretty factor
-        replay = True
-        show_station_deets = True
-        while replay:
-            with colors("blue"):
-                prefix = ">>> "
-                delete_cnt = play_station(
-                    chans[chan_num][0],
-                    prefix,
-                    show_station_deets)
-                del_prompt(delete_cnt)
-            with colors("purple"):
-                # it will reach here anytime the player stops executing
-                # (eg it has an exp, failure, etc)
-                # but ideally it'll only reach here when the user presses
-                # q (exiting the player) to "pause" it
-                # you can't use mpg123's 'pause' cmd (spacebar) bc it'll
-                # fail a minute or two after resuming (buffer errors)
-                # for some reason it literally pauses the music,
-                # buffering the stream until unpaused
-                # behavior we want is to stop recving the stream
-                # (like turning off a radio)
-                prompt = "Paused. Press enter to Resume; q to quit. "
-                reloop = get_input(prompt)
-                # if the user inputs anything other than pressing
-                # return/enter, then loop will quit
-                if len(reloop) != 0:
-                    replay = False
-                else:
-                    # for prettiness we don't want to reprint the station
-                    # details (name, etc) upon replaying within this loop
-                    show_station_deets = False
-                    # we also want to get rid of that prompt
-                    # to make room for the song name data again
-                    del_prompt(len(prompt) + len(prefix))
-                    sys.stdout.flush()
-                    # this play->pause->loop should never accumulate lines
-                    # in the output (except for the first Enter they press
-                    # at a prompt and even then, it's just an empty line)
-            # end with
+                    print(msg1)
+                    print(msg2)
+            else:
+                print("")  # empty line for pretty factor
+
+
+def play_chan(chan):
+    replay = True
+    show_station_deets = True
+    while replay:
+        with colors("blue"):
+            prefix = ">>> "
+            delete_cnt = play_station(
+                chan[0],
+                prefix,
+                show_station_deets)
+            del_prompt(delete_cnt)
+        with colors("purple"):
+            # it will reach here anytime the player stops executing
+            # (eg it has an exp, failure, etc)
+            # but ideally it'll only reach here when the user presses
+            # q (exiting the player) to "pause" it
+            # you can't use mpg123's 'pause' cmd (spacebar) bc it'll
+            # fail a minute or two after resuming (buffer errors)
+            # for some reason it literally pauses the music,
+            # buffering the stream until unpaused
+            # behavior we want is to stop recving the stream
+            # (like turning off a radio)
+            prompt = "Paused. Press enter to Resume; q to quit. "
+            reloop = get_input(prompt)
+            # if the user inputs anything other than pressing
+            # return/enter, then loop will quit
+            if len(reloop) != 0:
+                replay = False
+            else:
+                # for prettiness we don't want to reprint the station
+                # details (name, etc) upon replaying within this loop
+                show_station_deets = False
+                # we also want to get rid of that prompt
+                # to make room for the song name data again
+                del_prompt(len(prompt) + len(prefix))
+                sys.stdout.flush()
+                # this play->pause->loop should never accumulate lines
+                # in the output (except for the first Enter they press
+                # at a prompt and even then, it's just an empty line)
