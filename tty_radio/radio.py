@@ -54,19 +54,21 @@ def print_stations(chans, term_w, mode):
         print("Exiting, empty channels file, delete it and rerun")
         sys.exit(1)
     keys.sort()
-    # sets up infor to pretty print station data
-    # for i in keys:
+    # set up to pretty print station data
     # get left column width
     name_len = max([len(chans[a][1]) for a in chans]) + 1
     desc_len = term_w - name_len
-    # the first line has the name, each subsequent line has whitespace up to column begin mark
+    # the first line has the name
+    # each subsequent line has whitespace up to column begin mark
     # desc_first_line_fmt = "{{0:{0}}}".format(desc_len)
     # desc_nth_line_fmt   = ' ' * (name_len + 4) + desc_first_line_fmt
     # print the stations
     for i in keys:
         # print " %i) %s"%(i,chans[i][1])
         with colors("yellow"):
-            sys.stdout.write(" %2d" % i + " ) " + chans[i][1] + ' ' * (name_len - len(chans[i][1])))
+            sys.stdout.write(
+                " %2d" % i + " ) " + chans[i][1] +
+                ' ' * (name_len - len(chans[i][1])))
         with colors("green"):
             # print("desc" + desc[i])
             lines = textwrap.wrap(chans[i][2], desc_len - 6)
@@ -79,20 +81,30 @@ def print_stations(chans, term_w, mode):
     # print the hard coded access to the other station files pt 1
     if mode == "soma":
         with colors("yellow"):
-            sys.stdout.write(" %2d" % len(keys) + " ) Favorites" + ' ' * (name_len - len("Favorites")))
+            sys.stdout.write(
+                " %2d" % len(keys) + " ) Favorites" +
+                ' ' * (name_len - len("Favorites")))
         with colors("green"):
             lines = []
-            lines = textwrap.wrap("Enter " + str(len(keys)) + " or 'f' to show favorite channels", desc_len - 6)
+            lines = textwrap.wrap(
+                "Enter " + str(len(keys)) +
+                " or 'f' to show favorite channels",
+                desc_len - 6)
             line_cnt += len(lines)
             print(lines[0])
             for line in lines[1:]:
                 print(' ' * (name_len + 6) + line)
     elif mode == "favs":
         with colors("yellow"):
-            sys.stdout.write(" %2d" % len(keys) + " ) SomaFM" + ' ' * (name_len - len("SomaFM")))
+            sys.stdout.write(
+                " %2d" % len(keys) + " ) SomaFM" +
+                ' ' * (name_len - len("SomaFM")))
         with colors("green"):
             lines = []
-            lines = textwrap.wrap("Enter " + str(len(keys)) + " or 's' to show SomaFM channels", desc_len - 6)
+            lines = textwrap.wrap(
+                "Enter " + str(len(keys)) +
+                " or 's' to show SomaFM channels",
+                desc_len - 6)
             line_cnt += len(lines)
             print(lines[0])
             for line in lines[1:]:
@@ -102,16 +114,21 @@ def print_stations(chans, term_w, mode):
 
 
 def play_station(url, prefix, show_deets=1):
-    # mpg123 command line mp3 stream player, does unbuffered output, so the subprocess...readline snip works
-    # -C allows keyboard presses to send commands: space is pause/resume, q is quit, +/- control volume
-    # -@ tells it to read (for stream/playlist info) filenames/URLs from within the file located at the next arg
+    # mpg123 command line mp3 stream player
+    # does unbuffered output, so the subprocess...readline snip works
+    # -C allows keyboard presses to send commands:
+    #    space is pause/resume, q is quit, +/- control volume
+    # -@ tells it to read (for stream/playlist info) filenames/URLs from url
     subp_cmd = ["mpg123", "-f", VOL, "-C", "-@", url]
     try:
-        p = subprocess.Popen(subp_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        p = subprocess.Popen(
+            subp_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT)
     except OSError as e:
         raise Exception('OSError %s when executing %s' % (e, subp_cmd))
-    # "le='([^']*)';" -> Song title didn't parse(StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)
-    # Can't rely on no ' within title, so use ; eg "le='([^;]*)';"
+    # example to parse:
+    # StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)  # noqa
     title_re = re.compile("le='([^;]*)';")
 
     delete_cnt = 0
@@ -122,7 +139,8 @@ def play_station(url, prefix, show_deets=1):
         out = out.strip()
         if show_deets and not has_deeted and out[0:8] == "ICY-NAME":
             station_deets = out[10:]
-            if station_deets[0:3] != "Def":  # bc it's kinda poser having so much 'defcon' all over your screen
+            # bc it's kinda poser having so much 'defcon' all over your screen
+            if station_deets[0:3] != "Def":
                 # print(">>> " +  station_deets)
                 (term_w, term_h) = term_hw()
                 lines = textwrap.wrap(station_deets, term_w - len(prefix))
@@ -142,7 +160,8 @@ def play_station(url, prefix, show_deets=1):
             (term_w, term_h) = term_hw()
             if len(song_title) > (term_w - len(prefix)):
                 song_title = song_title[0:(term_w - len(prefix))]
-            # this will delete the last song, and reuse its line (so output only has one song title line)
+            # this will delete the last song, and reuse its line
+            # (so output only has one song title line)
             if COMPACT_TITLES:
                 if has_titled:
                     # del_chars(delete_cnt)
@@ -158,16 +177,19 @@ def play_station(url, prefix, show_deets=1):
 
 
 def del_chars(num_chars):
-    print('\b' * num_chars, end='')  # move cursor to beginning of text to remove
+    print('\b' * num_chars, end='')  # move cursor to beginning of text
     print(' '  * num_chars, end='')  # overwrite/delete all previous text
     print('\b' * num_chars, end='')  # reset cursor for new text
     return
 
 
-# \033[A moves cursor up 1 line; ' ' overwrites text, '\b' resets cursor to start of line
+# \033[A moves cursor up 1 line
+# ' ' overwrites text
+# '\b' resets cursor to start of line
 # if the term is narrow enough, you need to go up multiple lines
 def del_prompt(num_chars):
-    # determine lines to move up, there is at least 1 bc user pressed enter to give input
+    # determine lines to move up, there is at least 1
+    # bc user pressed enter to give input
     # when they pressed Enter, the cursor went to beginning of the line
     (term_w, term_h) = term_hw()
     move_up = int(math.ceil(float(num_chars) / float(term_w)))
@@ -284,7 +306,8 @@ def radio(mode):
                     print('\n' * (term_h - b_height - 2))
                 print(banner, end='')
             with colors("purple"):
-                prompt = "Press enter if you like banner (font: " + font + "), else any char then enter "
+                prompt = "Press enter if you like banner"
+                prompt += " (font: " + font + "), else any char then enter "
                 try:
                     happiness = get_input(prompt)
                 except SyntaxError:
@@ -306,25 +329,37 @@ def radio(mode):
         while replay:
             with colors("blue"):
                 prefix = ">>> "
-                delete_cnt = play_station(chans[chan_num][0], prefix, show_station_deets)
+                delete_cnt = play_station(
+                    chans[chan_num][0],
+                    prefix,
+                    show_station_deets)
                 del_prompt(delete_cnt)
             with colors("purple"):
-                # it will reach here anytime the player stops executing (eg it has an exp, failure, etc)
-                # but ideally it'll only reach here when the user presses q (exiting the player) to "pause" it
-                # you can't use mpg123's 'pause' cmd (spacebar) bc it'll fail a minute or two after resuming (buffer errors)
-                # for some reason it literally pauses the music, buffering the stream until unpaused
-                # behavior we want is to stop recving the stream (like turing off a radio)
+                # it will reach here anytime the player stops executing
+                # (eg it has an exp, failure, etc)
+                # but ideally it'll only reach here when the user presses
+                # q (exiting the player) to "pause" it
+                # you can't use mpg123's 'pause' cmd (spacebar) bc it'll
+                # fail a minute or two after resuming (buffer errors)
+                # for some reason it literally pauses the music,
+                # buffering the stream until unpaused
+                # behavior we want is to stop recving the stream
+                # (like turning off a radio)
                 prompt = "Paused. Press enter to Resume; q to quit. "
                 reloop = get_input(prompt)
-                # if the user inputs anything other than pressing return/enter, then loop will quit
+                # if the user inputs anything other than pressing
+                # return/enter, then loop will quit
                 if len(reloop) != 0:
                     replay = False
                 else:
-                    # for prettiness we don't want to reprint the station details (name, etc) upon replaying within this loop
+                    # for prettiness we don't want to reprint the station
+                    # details (name, etc) upon replaying within this loop
                     show_station_deets = False
-                    # we also want to get rid of that prompt to make room for the song name data again
+                    # we also want to get rid of that prompt
+                    # to make room for the song name data again
                     del_prompt(len(prompt) + len(prefix))
                     sys.stdout.flush()
-                    # this play->pause->loop should never accumulate lines in the output (except for the first Enter they press at a prompt and even then it's just an empty line)
+                    # this play->pause->loop should never accumulate lines
+                    # in the output (except for the first Enter they press
+                    # at a prompt and even then, it's just an empty line)
             # end with
-        # end while { show list, play selected station, wait for player to exit }
