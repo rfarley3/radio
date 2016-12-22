@@ -29,6 +29,7 @@ FILE_EXT = '.csv'
 class Station(object):
     def __init__(self, name, rebuild=True):
         self.name = name
+        self.rebuild = rebuild
         # TODO OS agnostic $HOME
         home = expanduser('~')
         fname = FILE_PREFIX + name + FILE_EXT
@@ -38,7 +39,8 @@ class Station(object):
         self.init_streams()
 
     def __str__(self):
-        return 'Station(name=%s,file=%s)' % (self.name, self.file)
+        return ('Station(name=%s,rebuild=%s,file=%s)' %
+                (self.name, self.rebuild, self.file))
 
     def __repr__(self):
         return str(self)
@@ -74,7 +76,17 @@ class Station(object):
                 if len(row) != 4 or row[0][0] == '#':
                     continue
                 row = [col.strip() for col in row]
-                self.streams.append(Stream(self.name, *row))
+                self.streams.append(
+                    Stream(
+                        self.name,
+                        row[1],
+                        row[0],
+                        row[2],
+                        row[3],
+                        self.reader))
+
+    def reader(self, inp):
+        print('read line: %s' % inp)
 
 
 class Soma(Station):

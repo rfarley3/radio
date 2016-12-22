@@ -42,11 +42,11 @@ class Radio(object):
     def song(self):
         if self._stream is None:
             return None
-        return self._stream.song
+        return self._stream.meta_song
 
     @property
     def is_playing(self):
-        if self._stream is not None and self._stream._is_playing:
+        if self._stream is not None and self._stream.is_playing:
             return True
         return False
 
