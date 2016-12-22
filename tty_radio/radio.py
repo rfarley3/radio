@@ -1,7 +1,7 @@
 from __future__ import print_function
 ########################################
 # Streaming radio terminal client
-# v0.1.4           Convert to pyradio
+# v0.1.4           Convert to tty_radio
 # v0.1.3 25Sep2014 Added proxy support
 # v0.1.2  7Aug2014 Added favs
 # v0.1.1  6Mar2014 Added Di.FM
@@ -10,14 +10,12 @@ from __future__ import print_function
 #
 # To use:
 #   run radio or radio -h to see all the argument options
-#   select station at prompt, by number in left column
+#   select station at prompt be entering number found in left column
 #   enjoy
 #
 # TODO
-#   generate and use pls/m3u files as web-parsed storage
-#      possibly move web-scraper to CLarg and only on demand (but alert if old)
-#      detect if stations fail
-#      perhaps get direct links for Soma
+#   possibly move web-scraper to CLarg and only on demand (but alert if old)
+#   detect if stations fail
 #   ability to CRUD a favorites playlist
 #   make Station class to hold:
 #     web-scraper
@@ -26,6 +24,7 @@ from __future__ import print_function
 #     menu "other stations"/station switch items
 #     custom deets filters
 #   custom colors for stations/streams
+#   Non-dark terminal (white bg) theme
 #   use pr_blk in print_streams
 #
 import platform

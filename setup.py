@@ -4,7 +4,9 @@ setup(
     name='tty_radio',
     packages=['tty_radio'],
     version='0.1.5',
-    description="Terminal player for online radio streams.",
+    description=(
+        "Linux/OS X terminal player for online radio streams, " +
+        "like SomaFM and WCPE. Flavored with colors and ASCII art."),
     author='Ryan Farley',
     author_email='rfarley3@gmu.edu',
     url='https://github.com/rfarley3/radio',
