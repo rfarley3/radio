@@ -13,7 +13,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'radio = radio.__main__:main',
+            'radio = tty_radio.__main__:main',
         ]
     },
 )

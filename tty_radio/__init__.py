@@ -7,7 +7,9 @@ SOMA_CHAN_FILENAME = ".somachannels.csv"
 CHAN_AGE_LIMIT = 7  # in days
 FAVS_CHAN_FILENAME = ".favchannels.csv"  # manually updated
 # Here is the default/recommended .favchannels.csv:
-FAVS_DEFAULT = """
+FAVS_DEFAULT = """\
+# CSV of stations columns:
+# Stream URL, Station Name, Description, Album Art URL
 http://www.ibiblio.org/wcpe/wcpe.pls,WCPE Classical,"TheClassicalStation.org from Wake Forest, NC",http://theclassicalstation.org/images/wcpe_footer.jpg
 http://ice.somafm.com/defcon,DEF CON Radio,Music for Hacking,http://somafm.com/img/defcon120.png
 http://ice.somafm.com/groovesalad,Groove Salad,Nice chill plate of ambient/downtempo beats and grooves,http://somafm.com/img/groovesalad120.png
