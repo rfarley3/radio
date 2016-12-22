@@ -131,10 +131,6 @@ def do_mpg123(url, prefix, show_deets=1):
             stderr=subprocess.STDOUT)
     except OSError as e:
         raise Exception('OSError %s when executing %s' % (e, subp_cmd))
-    # example to parse:
-    # StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)  # noqa
-    title_re = re.compile("le='([^;]*)';")
-
     delete_cnt = 0
     has_deeted = False
     has_titled = False
@@ -142,42 +138,68 @@ def do_mpg123(url, prefix, show_deets=1):
         out = bytes.decode(line)
         out = out.strip()
         if show_deets and not has_deeted and out[0:8] == "ICY-NAME":
-            station_deets = out[10:]
-            # bc it's kinda poser having so much 'defcon' all over your screen
-            if station_deets[0:3] != "Def":
-                # print(">>> " +  station_deets)
-                (term_w, term_h) = term_hw()
-                lines = textwrap.wrap(station_deets, term_w - len(prefix))
-                print(prefix + lines[0])
-                for line in lines[1:]:
-                    print(' ' * len(prefix) + line)
+            parsed = parse_name(out[10:])
+            if parsed is not None:
+                pr_blk(parsed, prefix)
             has_deeted = True
         elif out[0:8] == "ICY-META":
-            out = out[10:]
-            # print(">>> " +  out)
-            title_m = title_re.search(out)
-            try:
-                song_title = title_m.group(1)
-            except:  # TODO find actual exception
-                song_title = "Song title didn't parse(" + out + ")"
+            parsed = parse_song(out[10:])
             # confine song title to single line to look good
-            (term_w, term_h) = term_hw()
-            if len(song_title) > (term_w - len(prefix)):
-                song_title = song_title[0:(term_w - len(prefix))]
+            song_title = pr_blk(parsed, prefix, chomp=True, do_pr=False)
             # this will delete the last song, and reuse its line
             # (so output only has one song title line)
             if COMPACT_TITLES:
                 if has_titled:
-                    # del_chars(delete_cnt)
                     del_prompt(delete_cnt)
                 else:
                     has_titled = True
-                print(prefix + song_title)  # , end='')
-                sys.stdout.flush()
-                delete_cnt = len(song_title) + len(prefix)
-            else:
-                print(prefix + song_title)
+            print(song_title)
+            sys.stdout.flush()
+            delete_cnt = len(song_title)
     return delete_cnt
+
+
+def parse_name(station_deets):
+    # bc it's kinda poser having so much 'defcon' all over your screen
+    if station_deets[0:3] == "Def":
+        # print(">>> " +  station_deets)
+        return None
+    return station_deets
+
+
+def parse_song(metadata):
+    # example to parse:
+    # StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)  # noqa
+    title_re = re.compile("le='([^;]*)';")
+    # print(">>> " +  out)
+    title_m = title_re.search(metadata)
+    title = "Song title didn't parse(" + metadata + ")"
+    try:
+        title = title_m.group(1)
+    except:  # TODO find actual exception
+        return title
+    title = re.sub(r'\s{2,}-', ' -', title)
+    return title
+
+
+def pr_blk(buf, prefix='', chomp=False, do_pr=True):
+    if buf is None or buf == '':
+        if not do_pr:
+            return ''
+        return
+    (term_w, term_h) = term_hw()
+    if chomp and len(buf) > (term_w - len(prefix)):
+        msg = prefix + buf[0:(term_w - len(prefix))]
+        if not do_pr:
+            return msg
+        print(msg)
+    lines = textwrap.wrap(buf, term_w - len(prefix))
+    msg = prefix + lines[0]
+    for line in lines[1:]:
+        msg += ' ' * len(prefix) + line
+    if not do_pr:
+        return msg
+    print(msg)
 
 
 def del_chars(num_chars):
