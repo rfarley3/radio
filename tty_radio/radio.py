@@ -19,6 +19,12 @@ from __future__ import print_function
 #      detect if stations fail
 #      perhaps get direct links for Soma
 #   ability to CRUD a favorites playlist
+#   make Station class to hold:
+#     web-scraper
+#     file builder
+#     main menu banner
+#     menu "other stations"/mode switch items
+#     custom deets filters
 #
 import platform
 PY3 = False
