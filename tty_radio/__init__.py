@@ -1,5 +1,3 @@
-BANNER = "~=radio tuner=~"
-
 VOL = "11000"  # volume 0 .. 32k
 
 # CSV file format

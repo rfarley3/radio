@@ -39,9 +39,7 @@ else:
 
 from . import (
     VOL,
-    COMPACT_TITLES,
-    FAVS_CHAN_FILENAME,
-    SOMA_CHAN_FILENAME,
+    COMPACT_TITLES
 )
 from .color import colors
 from .banner import bannerize
@@ -189,26 +187,19 @@ def term_hw():
         return (80, 40)
 
 
-def do_ui(mode, home, chan_filename):
-    # ######
-    # get the station list
-    chans = get_stations(home + "/" + chan_filename, mode)
-    # ######
-    # main loop
-    # shows possible stations, takes in user input, and calls player
+def radio(mode):
+    """list possible stations, read user input, and call player"""
     # when the player is exited, this loop happens again
-    switch_mode = False
+    switch_mode = ''
     while(1):
         (term_w, term_h) = term_hw()
         if switch_mode != '':
             if switch_mode == 'f':
-                mode = "favs"
-                chan_filename = FAVS_CHAN_FILENAME
+                mode = 'favs'
             elif switch_mode == 's':
-                mode = "soma"
-                chan_filename = SOMA_CHAN_FILENAME
-            chans = get_stations(home + "/" + chan_filename, mode)
-            switch_mode = False
+                mode = 'soma'
+        chans = get_stations(mode)
+        switch_mode = ''
 
         # ######
         # print stations

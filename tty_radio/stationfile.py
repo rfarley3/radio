@@ -7,6 +7,11 @@ import csv
 import os
 import sys
 import time
+from os.path import (
+    expanduser,
+    join as path_join,
+    getmtime as os_getmtime
+)
 from bs4 import BeautifulSoup
 if PY3:
     from urllib.request import urlopen
@@ -14,6 +19,8 @@ else:
     from urllib2 import urlopen
 
 from . import (
+    FAVS_CHAN_FILENAME,
+    SOMA_CHAN_FILENAME,
     FAVS_DEFAULT,
     CHAN_AGE_LIMIT,
     SOMA_PARSE_URL,
@@ -36,6 +43,16 @@ Manually building some of the URLs:
 """  # noqa
 
 
+def get_fname(mode):
+    # TODO OS agnostic $HOME
+    home = expanduser('~')
+    if mode == 'soma':
+        fname = SOMA_CHAN_FILENAME
+    else:  # mode == 'favs'
+        fname = FAVS_CHAN_FILENAME
+    return path_join(home, fname)
+
+
 def build_favs(outfile):
     print("Building new file from default favs...")
     csv_chan_file = open(outfile, 'w')
@@ -47,7 +64,7 @@ def build_favs(outfile):
 def build_soma(outfile):
     # Scrapes channels from somafm.com
     # original at https://gist.github.com/roamingryan/2343819
-    # mod'ed by x0rion Feb 2014
+    # mod'ed Feb 2014
     #   store name and desc seo; add img url
     #   handle specific bad streams
     page = urlopen(SOMA_PARSE_URL)
@@ -61,7 +78,6 @@ def build_soma(outfile):
     else:
         csv_chan_file = open(outfile, 'w')
     chan_writer = csv.writer(csv_chan_file)
-
     for inst in chan_instances:
         stream_url_short = inst.find('a')['href'].replace("/", "")
         # for some reason, the following aren't at the expected URL
@@ -92,41 +108,43 @@ def build_soma(outfile):
     return
 
 
-def get_stations(filename, mode):
-    # if channel file older than X days rebuild
-    try:
-        chan_age = os.path.getctime(filename)
-    except:
-        chan_age = 0
-    age_limit = time.time() - (60 * 60 * 24 * CHAN_AGE_LIMIT)
-    if mode != "favs" and chan_age < age_limit:
+def assert_stationfile(mode):
+    filename = get_fname(mode)
+    rebuild = False
+    if not os.path.exists(filename):
         with colors("red"):
-            print("File(%s) is too old, backing up and rebuilding" %
-                  filename)
-        os.system("mv " + filename + " " + filename + ".bck")
-
-    # see if the channel file exists, catch other errors to
-    # if it doesn't exist, try to rebuild it and carry on
-    try:
-        csv_fd = open(filename, 'r')
-    except IOError as e:
-        # The file doesn't exist, we need to build it!
-        with colors("red"):
-            print("File(%s) doesn't exist; rebuilding." %
-                  filename)
-        if mode == "favs":
-            build_favs(filename)
-        elif mode == "soma":
-            build_soma(filename)
-        with colors("red"):
-            print("Finished building channel file")
-        # one last try to open the rebuilt file
-        try:
-            csv_fd = open(filename, 'r')
-        except IOError as e:
+            print("File(%s) missing, rebuilding" % filename)
+        rebuild = True
+    elif mode != 'favs':
+        age_limit = time.time() - (60 * 60 * 24 * CHAN_AGE_LIMIT)
+        chan_age = os_getmtime(filename)
+        # on except of getmtime set chan_age = 0
+        # if channel file older than X days rebuild
+        if chan_age < age_limit:
             with colors("red"):
-                print("Error (%s) opening channel, please run again." % e)
-            sys.exit(1)
+                print("File(%s) is too old, backing up and rebuilding" %
+                      filename)
+            rebuild = True
+            # TODO OS agnostic mv
+            os.system("mv " + filename + " " + filename + ".bck")
+    if not rebuild:
+        return
+    if mode == 'favs':
+        build_favs(filename)
+    elif mode == 'soma':
+        build_soma(filename)
+    with colors("red"):
+        print("Finished building channel file")
+
+
+def get_stations(mode):
+    assert_stationfile(mode)
+    try:
+        csv_fd = open(get_fname(mode), 'r')
+    except IOError as e:
+        with colors("red"):
+            print("Error (%s) opening channel, please run again." % e)
+        sys.exit(1)
     i = 0
     chans = {}
     for row in csv.reader(csv_fd):

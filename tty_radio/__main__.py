@@ -2,27 +2,20 @@
 from __future__ import print_function
 import sys
 import getopt
-from os.path import expanduser
 
-from . import (
-    BANNER,
-    FAVS_CHAN_FILENAME,  # TODO remove import
-    SOMA_CHAN_FILENAME,  # TODO remove import
-)
-from .radio import (
-    do_ui,
-    term_hw)
+from .radio import radio, term_hw
 from .color import colors
 from .banner import bannerize
 
 
-USAGE = """Usage %s [-h|--help|-s|--soma]
+USAGE = """\
+Usage %s [-h|--help|-s|--soma]
 \t-h or --help\tThis help message
 \t-s or --soma\tRun in SomaFM mode
 
 Python script for direct listening to online music streams.
 Built-in compatibility with SomaFM.
-Scrapes respective websites for urls and metadata.
+Scrapes known websites for stream urls and metadata.
 Puts it all into a nice list for you to select from, then calls mpg123.
 And let's not forget the pretty ASCII art...
 """
@@ -35,33 +28,29 @@ def usage():
     with colors("purple"):  # or blue, green, yellow, red
         print(banner)
     print("Font: " + font)
-    sys.exit(0)
 
 
-def main():
-    sys.stdout.write("\x1b]0;" + BANNER + "\x07")
-    # ######
-    # handle command line args
-    mode = "favs"
-    chan_filename = FAVS_CHAN_FILENAME
+def main(args):
+    # set term title
+    sys.stdout.write("\x1b]0;" + "~=radio tuner=~" + "\x07")
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hs:", ["help", "soma"])
+        opts, args = getopt.getopt(args, "hs:", ["help", "soma"])
     except getopt.GetoptError:
         usage()
+        return 2
+    mode = "favs"
     for opt, arg in opts:
-        # print("here")
         if opt in("-s", "--soma"):
             mode = "soma"
-            chan_filename = SOMA_CHAN_FILENAME
         elif opt in("-h", "--help"):
             usage()
+            return 0
         else:
             usage()
-    # we want the home directory to find/store the channels file
-    home = expanduser("~")
-    do_ui(mode, home, chan_filename)
+            return 1
+    radio(mode)
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
