@@ -49,7 +49,7 @@ def main(args=sys.argv[1:]):
     # set term title
     sys.stdout.write("\x1b]0;" + "~=radio tuner=~" + "\x07")
     try:
-        radio(mode)
+        ui(mode)
     except KeyboardInterrupt:
         pass
     # clear term title

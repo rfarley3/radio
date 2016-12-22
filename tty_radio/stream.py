@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 
-class Stream(Object):
+class Stream(object):
     def __init__(self, station, name, url, desc, art):
         self.station = station
         self.name = name
@@ -17,7 +17,7 @@ class Stream(Object):
 
     def __repr__(self):
         return str(self)
-    
+
     def play(self):
         pass
 

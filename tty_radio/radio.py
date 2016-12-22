@@ -3,7 +3,7 @@ from __future__ import print_function
 from .station import (Favs, Soma)
 
 
-class Radio(Object):
+class Radio(object):
     def __init__(self):
         self._station = None
         self._stream = None
@@ -26,7 +26,7 @@ class Radio(Object):
     @station.setter
     def station(self, station_name):
         if station_name != self.station:
-            self.set(station)
+            self.set(station_name)
 
     @property
     def stream(self):
@@ -58,7 +58,6 @@ class Radio(Object):
         if self.is_playing:
             print('Error, stop stream before set')
             return False
-        station = None
         objs = [st for st in self._stations if st.name == station_name]
         if len(objs) != 1:
             print('Error, no matching station')
