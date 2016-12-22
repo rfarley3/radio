@@ -7,9 +7,9 @@ from bisect import bisect
 from io import BytesIO
 from random import choice
 if PY3:
-    from urllib.request import urlopen
+    from urllib.request import urlopen, URLError
 else:
-    from urllib2 import urlopen
+    from urllib2 import urlopen, URLError
 PYPILLOW = False
 try:
     from PIL import Image
@@ -64,7 +64,7 @@ def gen_art(url, term_w, term_h):
     # open image and resize
     try:
         image = urlopen(url).read()
-    except:  # TODO get exception
+    except URLError:
         print("Warning: couldn't retrieve file" + url)
         return
 

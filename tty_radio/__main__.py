@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import sys
-import getopt
+from getopt import getopt, GetoptError
 
 from .radio import radio, term_hw
 from .color import colors
@@ -15,7 +15,7 @@ Usage %s [-h|--help|-s|--soma]
 
 Python script for direct listening to online music streams.
 Built-in compatibility with SomaFM.
-Scrapes known websites for stream urls and metadata.
+Scrapes known stations' websites for stream urls and metadata.
 Puts it all into a nice list for you to select from, then calls mpg123.
 And let's not forget the pretty ASCII art...
 """
@@ -32,8 +32,8 @@ def usage():
 
 def main(args=sys.argv[1:]):
     try:
-        opts, args = getopt.getopt(args, "hs:", ["help", "soma"])
-    except getopt.GetoptError:
+        opts, args = getopt(args, "hs:", ["help", "soma"])
+    except GetoptError:
         usage()
         return 2
     mode = "favs"

@@ -3,7 +3,7 @@ from random import choice
 from io import StringIO
 PYFIG = True
 try:
-    from pyfiglet import Figlet
+    from pyfiglet import Figlet, FontNotFound
 except ImportError:
     PYFIG = False
     print("Hey-o, you don't have ascii art banner libs installed:")
@@ -39,10 +39,8 @@ def rand_font():
         try:
             Figlet(font=fi)
             return fi
-        except:  # TODO get exception for font failure
+        except FontNotFound:
             continue
-    # print(f.renderText(fi))
-    # fi = "bulbhead"
     return "none"
 
 

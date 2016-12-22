@@ -15,7 +15,7 @@ from __future__ import print_function
 #
 # TODO
 #   generate and use pls/m3u files as web-parsed storage
-#      possibly move web-scrape to CLarg and only on demand (but alert if old)
+#      possibly move web-scraper to CLarg and only on demand (but alert if old)
 #      detect if stations fail
 #      perhaps get direct links for Soma
 #   ability to CRUD a favorites playlist
@@ -23,7 +23,7 @@ from __future__ import print_function
 #     web-scraper
 #     file builder
 #     main menu banner
-#     menu "other stations"/mode switch items
+#     menu "other stations"/station switch items
 #     custom deets filters
 #
 import platform
@@ -50,19 +50,19 @@ from . import (
 from .color import colors
 from .banner import bannerize
 from .album import gen_art
-from .stationfile import get_stations
+from .stationfile import get_station_streams
 
 
-def print_stations(chans, term_w, mode):
-    keys = list(chans.keys())
+def print_streams(streams, term_w, station):
+    keys = list(streams.keys())
     line_cnt = 0
     if len(keys) == 0:
-        print("Exiting, empty channels file, delete it and rerun")
+        print("Exiting, empty station file, delete it and rerun")
         sys.exit(1)
     keys.sort()
     # set up to pretty print station data
     # get left column width
-    name_len = max([len(chans[a][1]) for a in chans]) + 1
+    name_len = max([len(streams[a][1]) for a in streams]) + 1
     desc_len = term_w - name_len
     # the first line has the name
     # each subsequent line has whitespace up to column begin mark
@@ -70,22 +70,21 @@ def print_stations(chans, term_w, mode):
     # desc_nth_line_fmt   = ' ' * (name_len + 4) + desc_first_line_fmt
     # print the stations
     for i in keys:
-        # print " %i) %s"%(i,chans[i][1])
+        # print " %i) %s"%(i,streams[i][1])
         with colors("yellow"):
             sys.stdout.write(
-                " %2d" % i + " ) " + chans[i][1] +
-                ' ' * (name_len - len(chans[i][1])))
+                " %2d" % i + " ) " + streams[i][1] +
+                ' ' * (name_len - len(streams[i][1])))
         with colors("green"):
             # print("desc" + desc[i])
-            lines = textwrap.wrap(chans[i][2], desc_len - 6)
+            lines = textwrap.wrap(streams[i][2], desc_len - 6)
             line_cnt += len(lines)
             print(lines[0])
             for line in lines[1:]:
                 print(' ' * (name_len + 6) + line)
-    # gen_line_cnt = line_cnt
 
     # print the hard coded access to the other station files pt 1
-    if mode == "soma":
+    if station == "soma":
         with colors("yellow"):
             sys.stdout.write(
                 " %2d" % len(keys) + " ) Favorites" +
@@ -94,13 +93,13 @@ def print_stations(chans, term_w, mode):
             lines = []
             lines = textwrap.wrap(
                 "Enter " + str(len(keys)) +
-                " or 'f' to show favorite channels",
+                " or 'f' to show favorite streams",
                 desc_len - 6)
             line_cnt += len(lines)
             print(lines[0])
             for line in lines[1:]:
                 print(' ' * (name_len + 6) + line)
-    elif mode == "favs":
+    elif station == "favs":
         with colors("yellow"):
             sys.stdout.write(
                 " %2d" % len(keys) + " ) SomaFM" +
@@ -109,17 +108,16 @@ def print_stations(chans, term_w, mode):
             lines = []
             lines = textwrap.wrap(
                 "Enter " + str(len(keys)) +
-                " or 's' to show SomaFM channels",
+                " or 's' to show SomaFM streams",
                 desc_len - 6)
             line_cnt += len(lines)
             print(lines[0])
             for line in lines[1:]:
                 print(' ' * (name_len + 6) + line)
-    # return(keys, gen_line_cnt)
-    return(keys, line_cnt - 1)
+    return (keys, line_cnt - 1)
 
 
-def play_station(url, prefix, show_deets=1):
+def do_mpg123(url, prefix, show_deets=1):
     # mpg123 command line mp3 stream player
     # does unbuffered output, so the subprocess...readline snip works
     # -C allows keyboard presses to send commands:
@@ -204,54 +202,65 @@ def del_prompt(num_chars):
 
 
 def term_hw():
+    (w, h) = (80, 40)
     try:
         # *nix get terminal/console width
         rows, columns = os.popen('stty size', 'r').read().split()
-    except:  # TODO get actual exeption
-        return (80, 40)
-    try:
-        width  = int(columns)
-        height = int(rows)
-        return (width, height)
-        # print("term width: %d"% width)
     except ValueError:
-        return (80, 40)
+        return (w, h)
+    try:
+        w = int(columns)
+        h = int(rows)
+    except ValueError:
+        pass
+    # print("term width: %d"% width)
+    return (w, h)
 
 
-def get_chan(mode, keys):
-    # ######
-    # get user input
-    #     if next_mode != '':
-    #     if next_mode == 'f':
-    #         mode = 'favs'
-    #     elif next_mode == 's':
-    #         mode = 'soma'
-    # next_mode = ''
-    chan_num = None
-    while chan_num not in keys:
-        try:
-            chan_num = get_input("\nPlease select a channel [q to quit]: ")
-        except SyntaxError:
+def read_input():
+    try:
+        stream_num = get_input("\nPlease select a stream [q to quit]: ")
+    except SyntaxError:
+        return
+    if not stream_num:
+        return
+    stream_num = str(stream_num).strip().lower()
+    if len(stream_num) == 0:
+        return
+    return stream_num
+
+
+def try_as_int(stream_num, station, max_val):
+    try:
+        stream_num = int(stream_num)
+    except ValueError:
+        return None
+    # keys[len] is the other station
+    if stream_num < 0 or stream_num > max_val:
+        return None
+    # the final row is not a stream, but a station change
+    if stream_num == max_val:
+        if station == 'favs':
+            return (None, 'soma')
+        # else station == 'soma'
+        return (None, 'favs')
+    return (stream_num, station)
+
+
+def get_choice(station, keys):
+    """Get user choice of stream to play, or station to change"""
+    stream_num = None
+    while stream_num not in keys:
+        stream_num = read_input()
+        if stream_num is None:
             continue
-        if not chan_num:
-            continue
-        chan_num = str(chan_num).strip().lower()
-        if len(chan_num) == 0:
-            continue
-        try:
-            chan_num = int(chan_num)
-            if chan_num < len(keys):
-                return (chan_num, None)
-            # the final row is not a stream, but a mode change
-            if mode == 'favs' and chan_num == len(keys):
-                return (None, 'soma')
-            if mode == 'soma' and chan_num == len(keys):
-                return (None, 'favs')
-        except ValueError:
-            pass
-        ctrl_char = chan_num[0]
+        ctrl_char = stream_num[0]
         if ctrl_char not in ['q', 'e', 's', 'f']:
-            continue
+            retval = try_as_int(stream_num, station, len(keys))
+            if retval is None:
+                continue
+            else:
+                return retval
         if (ctrl_char == 'q' or ctrl_char == 'e'):
             return (None, 'q')
         if ctrl_char == 'f':
@@ -261,18 +270,16 @@ def get_chan(mode, keys):
     # should never be here
 
 
-def radio(mode):
+def radio(station):
     """list possible stations, read user input, and call player"""
     # when the player is exited, this loop happens again
     while(1):
         (term_w, term_h) = term_hw()
-        chans = get_stations(mode)
+        streams = get_station_streams(station)
         # ######
         # print stations
-        title = "unknown"
-        if mode == 'favs':
-            title = "Radio Tuner"
-        elif mode == 'soma':
+        title = "Radio Tuner"
+        if station == 'soma':
             title = "SomaFM Tuner"
         with colors("red"):
             (banner, font) = bannerize(title, term_w)
@@ -280,41 +287,41 @@ def radio(mode):
             b_h = len(b_IO.readlines())
             print(banner)  # , end='')
             b_h += 1
-        (keys, line_cnt) = print_stations(chans, term_w, mode)
+        (keys, line_cnt) = print_streams(streams, term_w, station)
         loop_line_cnt = line_cnt + b_h + 2
         loop_line_cnt += 1
         if term_h > loop_line_cnt:
             print('\n' * (term_h - loop_line_cnt - 1))
-        (chan_num, mode) = get_chan(mode, keys)
-        if mode == 'q':
+        (stream_num, station) = get_choice(station, keys)
+        if station == 'q':
             return
-        # no chan given, must have been a mode change, refresh list
-        if chan_num is None:
+        # no stream given, must have been a station change, refresh list
+        if stream_num is None:
             continue
         # ######
-        # otherwise chan num specified, so call player
-        display_album(chans[chan_num])
-        display_banner(chans[chan_num])
-        play_chan(chans[chan_num])
+        # otherwise stream num specified, so call player
+        display_album(streams[stream_num])
+        display_banner(streams[stream_num])
+        play_stream(streams[stream_num])
 
 
-def display_album(chan):
-    if chan[3] == "":
+def display_album(stream):
+    if stream[3] == "":
         return
     print("ASCII Printout of Station's Logo:")
     (term_w, term_h) = term_hw()
-    art = gen_art(chan[3], term_w, term_h)
+    art = gen_art(stream[3], term_w, term_h)
     if art is not None:
         print(art)
 
 
-def display_banner(chan):
+def display_banner(stream):
     unhappy = True
     while unhappy:
         (term_w, term_h) = term_hw()
         font = "unknown"
         with colors("yellow"):
-            (banner, font) = bannerize(chan[1], term_w)
+            (banner, font) = bannerize(stream[1], term_w)
             b_IO = StringIO(banner)
             b_height = len(b_IO.readlines())
             if term_h > (b_height + 3):  # Playing, Station Name, Song Title
@@ -330,7 +337,7 @@ def display_banner(chan):
             del_prompt(len(prompt) + len(happiness))
             if len(happiness) == 0:
                 unhappy = False
-                msg1 = "Playing station, enjoy..."
+                msg1 = "Playing stream, enjoy..."
                 msg2 = "[pause/quit=q; vol=+/-]"
                 if term_w > (len(msg1) + len(msg2)):
                     print(msg1 + ' ' + msg2)
@@ -341,14 +348,14 @@ def display_banner(chan):
                 print("")  # empty line for pretty factor
 
 
-def play_chan(chan):
+def play_stream(stream):
     replay = True
     show_station_deets = True
     while replay:
         with colors("blue"):
             prefix = ">>> "
-            delete_cnt = play_station(
-                chan[0],
+            delete_cnt = do_mpg123(
+                stream[0],
                 prefix,
                 show_station_deets)
             del_prompt(delete_cnt)
