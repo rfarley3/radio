@@ -18,7 +18,7 @@ class Stream(object):
         self.meta_song = None
         self._is_playing = False
         self._is_paused = False
-        self._wpipe = None
+        self._subproc = None
 
     def __str__(self):
         return ('Stream(station=%s,name=%s,url=%s,desc=%s,art=%s)' %
@@ -36,22 +36,19 @@ class Stream(object):
         self._is_paused = False
         self.thread = Thread(
             target=mpg123,
-            args=(self.url, self.get_wpipe, self.reader))
+            args=(self.url, self.get_subproc, self.reader))
         self.thread.daemon = True
         self.thread.start()
 
-    def get_wpipe(self, wpipe):
-        self._wpipe = wpipe
-
-    def writer(self, data):
-        self._wpipe.stdin.write(data)
+    def get_subproc(self, subproc):
+        self._subproc = subproc
 
     def pause(self):
-        self.writer('q'.encode('ascii'))
+        self._subproc.kill()
         self._is_paused = True
 
     def stop(self):
-        self.writer('q'.encode('ascii'))
+        self._subproc.kill()
         self._is_playing = False
 
     def reader(self, inp):
@@ -96,7 +93,7 @@ def mpg123(url, get_p, stream_reader):
     # -C allows keyboard presses to send commands:
     #    space is pause/resume, q is quit, +/- control volume
     # -@ tells it to read (for stream/playlist info) filenames/URLs from url
-    subp_cmd = ["mpg123", "-f", VOL, "-C", "-@", url]
+    subp_cmd = ["mpg123", "-f", VOL, "-@", url]
     try:
         p = subprocess.Popen(
             subp_cmd,
