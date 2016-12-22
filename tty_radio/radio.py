@@ -50,6 +50,12 @@ class Radio(object):
             return True
         return False
 
+    @property
+    def is_paused(self):
+        if self._stream is not None and self._stream.is_paused:
+            return True
+        return False
+
     def set(self, station_name, stream_name=None):
         if stream_name is None and station_name == self.station:
             return True
@@ -75,8 +81,11 @@ class Radio(object):
         return True
 
     def play(self, station_stream=None):
+        if self.is_playing and not self.is_paused:
+            print('Error, pause stream before play')
+            return (None, None)
         if self.is_playing:
-            print('Error, pause/stop stream before play')
+            print('Error, stop/pause stream before play')
             return (None, None)
         if station_stream is not None:
             station, stream = station_stream
