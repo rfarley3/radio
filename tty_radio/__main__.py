@@ -3,7 +3,7 @@ from __future__ import print_function
 import sys
 from getopt import getopt, GetoptError
 
-from .radio import radio, term_hw
+from .ui import ui, term_hw
 from .color import colors
 from .banner import bannerize
 

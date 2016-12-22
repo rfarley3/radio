@@ -24,6 +24,3 @@ COMPACT_TITLES = True
 >>> Karsh Kale - Satellite
 """
 
-# maximum age of any channel file before rebuilding it
-CHAN_AGE_LIMIT = 7  # in days
-FILE_PREFIX = '.tty_radio-'

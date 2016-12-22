@@ -16,6 +16,7 @@ setup(
     install_requires=[
         'beautifulsoup4',
         'pyfiglet',
+        'bottle'
     ],
     entry_points={
         'console_scripts': [
