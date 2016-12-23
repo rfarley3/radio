@@ -31,16 +31,16 @@ class Server(object):
         self.radio = radio
 
     def run(self):
-        route('/')(self.index)
-        route('/status')(self.status)
-        route('/stations')(self.stations)
-        route('/streams')(self.streams)
-        route('/<station>/streams')(self.streams)
-        post('/<station>')(self.set)
-        post('/<station>/<stream>')(self.set)
-        route('/play')(self.play)
-        route('/pause')(self.pause)
-        route('/stop')(self.stop)
+        route('/api/v1/')(self.index)
+        route('/api/v1/status')(self.status)
+        route('/api/v1/stations')(self.stations)
+        route('/api/v1/streams')(self.streams)
+        route('/api/v1/<station>/streams')(self.streams)
+        post('/api/v1/<station>')(self.set)
+        post('/api/v1/<station>/<stream>')(self.set)
+        route('/api/v1/play')(self.play)
+        route('/api/v1/pause')(self.pause)
+        route('/api/v1/stop')(self.stop)
         run(host=self.host, port=self.port, debug=DEBUG)
 
     # TODO load a js frontend
@@ -113,7 +113,7 @@ class Client(object):
             (self.host, self.port) = addr
 
     def url(self, endpoint):
-        return 'http://%s:%s%s' % (self.host, self.port, endpoint)
+        return 'http://%s:%s/api/v1/%s' % (self.host, self.port, endpoint)
 
     def get(self, endpoint):
         try:
@@ -140,14 +140,14 @@ class Client(object):
         return resp_val
 
     def status(self):
-        rjson = self.get('/status')
+        rjson = self.get('status')
         if not rjson['success']:
             print('API request failure: %s' % rjson)
             return {}
         return rjson['resp']
 
     def stations(self):
-        rjson = self.get('/stations')
+        rjson = self.get('stations')
         if not rjson['success']:
             print('API request failure: %s' % rjson)
             return []
@@ -155,16 +155,16 @@ class Client(object):
 
     def streams(self, station=None):
         if station is None:
-            rjson = self.get('/streams')
+            rjson = self.get('streams')
         else:
-            rjson = self.get('/%s/streams' % station)
+            rjson = self.get('%s/streams' % station)
         if not rjson['success']:
             print('API request failure: %s' % rjson)
             return []
         return rjson['resp']['streams']
 
     def set(self, station, stream):
-        rjson = self.post('/%s/%s' % (station, stream))
+        rjson = self.post('%s/%s' % (station, stream))
         if not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
@@ -175,21 +175,21 @@ class Client(object):
             station, stream = station_stream
             self.set(station, stream)
             # TODO error check
-        rjson = self.get('/play')
+        rjson = self.get('play')
         if not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
         return True
 
     def pause(self):
-        rjson = self.get('/pause')
+        rjson = self.get('pause')
         if not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
         return True
 
     def stop(self):
-        rjson = self.get('/stop')
+        rjson = self.get('stop')
         if not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
