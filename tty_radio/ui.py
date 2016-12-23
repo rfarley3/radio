@@ -6,7 +6,6 @@ if platform.python_version().startswith('3'):
 import sys
 import textwrap
 import os
-import subprocess
 import re
 import math
 from time import sleep
@@ -16,9 +15,7 @@ if PY3:
 else:
     get_input = raw_input
 
-from . import (
-    VOL,
-    COMPACT_TITLES)
+from . import COMPACT_TITLES
 from .color import colors, THEME
 from .banner import bannerize
 from .album import gen_art
