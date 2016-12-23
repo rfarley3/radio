@@ -7,7 +7,7 @@ from getopt import getopt, GetoptError
 
 from .ui import ui
 from .api import Server
-from .ui import term_hw
+from .ui import term_wh
 from .color import colors
 from .banner import bannerize
 
@@ -34,7 +34,7 @@ About:
 
 def usage():
     print(USAGE % sys.argv[0])
-    (term_w, term_h) = term_hw()
+    (term_w, term_h) = term_wh()
     (banner, font) = bannerize('ASCII Art, FTW!', term_w)
     with colors('purple'):  # or blue, green, yellow, red
         print(banner)

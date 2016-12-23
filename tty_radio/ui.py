@@ -49,7 +49,7 @@ def stream_list(streams):
 
 
 def print_streams(station, streams, stations):
-    (term_w, term_h) = term_hw()
+    (term_w, term_h) = term_wh()
     line_cnt = 0
     if len(streams) == 0:
         print("Exiting, empty station file, delete it and rerun")
@@ -94,12 +94,12 @@ def del_prompt(num_chars):
     # determine lines to move up, there is at least 1
     # bc user pressed enter to give input
     # when they pressed Enter, the cursor went to beginning of the line
-    (term_w, term_h) = term_hw()
+    (term_w, term_h) = term_wh()
     move_up = int(math.ceil(float(num_chars) / float(term_w)))
     print("\033[A" * move_up + ' ' * num_chars + '\b' * (num_chars), end='')
 
 
-def term_hw():
+def term_wh():
     (w, h) = (80, 40)
     try:
         # TODO os agnostic tty size
@@ -197,7 +197,7 @@ def ui_loop(client, station='favs'):
     # streams.sort()  # put in alpha order
     # ######
     # print stations
-    (term_w, term_h) = term_hw()
+    (term_w, term_h) = term_wh()
     banner_txt = deets['ui_name'] + ' Tuner'
     with colors(THEME['ui_banner']):
         (banner, font) = bannerize(banner_txt, term_w)
@@ -228,10 +228,54 @@ def ui_loop(client, station='favs'):
         return station
     display_album(stream['art'])
     display_banner(stream['name'])
-    display_metadata(c, stream)
-    c.stop()
-    # TODO poll user input to send stop
+    # this play->pause->play loop should never accumulate lines
+    # in the output (except for the first Enter they press
+    # at a prompt and even then, it's just an empty line)
+    i = 0
+    do_another = True
+    while do_another:
+        display_info()
+        try:
+            if display_metadata(c, stream):
+                c.stop()
+                do_another = False
+        # TODO poll user input for q to stop
+        except KeyboardInterrupt:
+            c.pause()
+            # clear ctrl+c
+            print('\b' * 5 + ' ' * 5 + '\b' * 5, end='')
+            if COMPACT_TITLES:
+                # clear info, name, song
+                to_del = term_wh()[0]
+                for i in range(3):
+                    print("\033[A" + ' ' * to_del + '\b' * to_del, end='')
+                sys.stdout.flush()
+            prompt = "Paused. Press enter to Resume; m for menu. "
+            with colors(THEME['stream_exit_confirm']):
+                reloop = get_input(prompt)
+            del_prompt(len(prompt) + len(reloop))
+            # any key, not just m, takes you to the menu
+            if len(reloop) != 0:
+                c.stop()
+                do_another = False
+        i += 1
+    # you can't use mpg123's 'pause' cmd (spacebar) bc it'll
+    # fail a minute or two after resuming (buffer errors)
+    # it literally pauses the music,
+    # buffering the stream until unpaused, but the
+    # behavior we want is to stop recving the stream
+    # (like turning off a radio)
     return station
+
+
+def display_info():
+    msg1 = "Playing stream, enjoy..."
+    msg2 = "[ctrl-c for pause/options]"
+    with colors(THEME['stream_name_confirm']):
+        if term_wh()[0] <= (len(msg1) + len(msg2)):
+            print(msg1)
+        else:
+            print(msg1 + ' ' + msg2)
 
 
 def display_metadata(client, stream):
@@ -242,7 +286,15 @@ def display_metadata(client, stream):
     station_name = stream['station']
     stream_name = stream['name']
     station_stream = (station_name, stream_name)
-    c.play(station_stream)
+    if COMPACT_TITLES:
+        print()
+        print()
+    # don't assume that it's not playing from another client
+    if not c.play(station_stream):
+        print('Error, already playing %s' % c.status())
+        # TODO ignore if playing what was requested
+        return False
+    showed_name = False
     i = 0
     disp_name = stream['meta_name']
     # disp names of '', like DEF CON Radio will escape loop
@@ -254,9 +306,15 @@ def display_metadata(client, stream):
     if disp_name is None:
         disp_name = stream_name
     if disp_name is not None and disp_name != '':
+        showed_name = True
+        if COMPACT_TITLES:
+            print("\033[A" * 2, end='')
         print_blockify(
             THEME['meta_prefix_str'], THEME['meta_prefix'],
-            disp_name, THEME['meta_stream_name'])
+            disp_name, THEME['meta_stream_name'],
+            wrap=False)
+        if COMPACT_TITLES:
+            print()
     # wait for initial song
     i = 0
     song_len = 0
@@ -268,10 +326,16 @@ def display_metadata(client, stream):
         sleep(0.5)
         i += 1
     if song_name is not None and song_name != '':
+        if COMPACT_TITLES:
+            print("\033[A", end='')
+            if not showed_name:
+                print("\033[A", end='')
         song_len = print_blockify(
             THEME['meta_prefix_str'], THEME['meta_prefix'],
             song_name, THEME['meta_song_name'],
             wrap=False)[0]
+        if COMPACT_TITLES and not showed_name:
+            print()
     # keep polling for song title changes
     do_another = True
     while do_another:
@@ -287,8 +351,9 @@ def display_metadata(client, stream):
             song_name = song_now
         is_playing = status['currently_streaming']
         if not is_playing:
-            return
+            return True
         sleep(1)
+    return True
 
 
 def print_blockify(prefix='', prefix_color='endc',
@@ -301,7 +366,7 @@ def print_blockify(prefix='', prefix_color='endc',
     with colors(prefix_color):
         # sys.stdout.write && flush
         print(prefix, end='')
-    (term_w, term_h) = term_hw()
+    (term_w, term_h) = term_wh()
     lines = textwrap.wrap(blk, term_w - p_len)
     max_blk_len = len(lines[0])
     with colors(blk_color):
@@ -321,7 +386,7 @@ def print_blockify(prefix='', prefix_color='endc',
 def display_album(art_url):
     if art_url is None or art_url == '':
         return
-    (term_w, term_h) = term_hw()
+    (term_w, term_h) = term_wh()
     art = gen_art(art_url, term_w, term_h)
     if art is None:
         return
@@ -332,7 +397,7 @@ def display_album(art_url):
 def display_banner(stream_name):
     unhappy = True
     while unhappy:
-        (term_w, term_h) = term_hw()
+        (term_w, term_h) = term_wh()
         font = "unknown"
         with colors(THEME['stream_name_banner']):
             (banner, font) = bannerize(stream_name, term_w)
@@ -351,95 +416,5 @@ def display_banner(stream_name):
             del_prompt(len(prompt) + len(happiness))
             if len(happiness) == 0:
                 unhappy = False
-                msg1 = "Playing stream, enjoy..."
-                msg2 = "[pause/quit=q; vol=+/-]"
-                if term_w > (len(msg1) + len(msg2)):
-                    print(msg1 + ' ' + msg2)
-                else:
-                    print(msg1)
-                    print(msg2)
             else:
                 print("")  # empty line for pretty factor
-
-
-def old_filter(stream, parse_name, parse_song, pr_blk):  # noqa
-    def do_mpg123(url, prefix, show_deets=1):
-        # mpg123 command line mp3 stream player
-        # does unbuffered output, so the subprocess...readline snip works
-        # -C allows keyboard presses to send commands:
-        #    space is pause/resume, q is quit, +/- control volume
-        # -@ tells it to read (for stream/playlist info) filenames/URLs from url
-        subp_cmd = ["mpg123", "-f", VOL, "-C", "-@", url]
-        try:
-            p = subprocess.Popen(
-                subp_cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT)
-        except OSError as e:
-            raise Exception('OSError %s when executing %s' % (e, subp_cmd))
-        delete_cnt = 0
-        has_deeted = False
-        has_titled = False
-        for line in iter(p.stdout.readline, b''):
-            out = bytes.decode(line)
-            out = out.strip()
-            if show_deets and not has_deeted and out[0:8] == "ICY-NAME":
-                parsed = parse_name(out[10:])
-                if parsed is not None:
-                    pr_blk(parsed, prefix)
-                has_deeted = True
-            elif out[0:8] == "ICY-META":
-                parsed = parse_song(out[10:])
-                # confine song title to single line to look good
-                song_title = pr_blk(parsed, prefix, chomp=True, do_pr=False)
-                # this will delete the last song, and reuse its line
-                # (so output only has one song title line)
-                if COMPACT_TITLES:
-                    if has_titled:
-                        del_prompt(delete_cnt)
-                    else:
-                        has_titled = True
-                print(song_title)
-                sys.stdout.flush()
-                delete_cnt = len(song_title)
-        return delete_cnt
-    # end do_mpg123
-
-    replay = True
-    show_station_deets = True
-    while replay:
-        with colors(THEME['meta_prefix']):
-            prefix = THEME['meta_prefix_str']
-            delete_cnt = do_mpg123(
-                stream[0],
-                prefix,
-                show_station_deets)
-            del_prompt(delete_cnt)
-        with colors(THEME['stream_exit_confirm']):
-            # it will reach here anytime the player stops executing
-            # (eg it has an exp, failure, etc)
-            # but ideally it'll only reach here when the user presses
-            # q (exiting the player) to "pause" it
-            # you can't use mpg123's 'pause' cmd (spacebar) bc it'll
-            # fail a minute or two after resuming (buffer errors)
-            # for some reason it literally pauses the music,
-            # buffering the stream until unpaused
-            # behavior we want is to stop recving the stream
-            # (like turning off a radio)
-            prompt = "Paused. Press enter to Resume; q to quit. "
-            reloop = get_input(prompt)
-            # if the user inputs anything other than pressing
-            # return/enter, then loop will quit
-            if len(reloop) != 0:
-                replay = False
-            else:
-                # for prettiness we don't want to reprint the station
-                # details (name, etc) upon replaying within this loop
-                show_station_deets = False
-                # we also want to get rid of that prompt
-                # to make room for the song name data again
-                del_prompt(len(prompt) + len(prefix))
-                sys.stdout.flush()
-                # this play->pause->loop should never accumulate lines
-                # in the output (except for the first Enter they press
-                # at a prompt and even then, it's just an empty line)
