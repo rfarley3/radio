@@ -14,11 +14,10 @@ from .banner import bannerize
 
 
 USAGE = """\
-Usage %s [-h|--help|-u|--ui]
+Usage %s [-h|--help]
 \t-h or --help\tThis help message
-\t-u or --ui\tLaunch command line UI
 
-To use:
+To use Terminal UI:
   Select station at prompt, by entering number found in left column
   Enjoy
 
@@ -42,20 +41,15 @@ def usage():
 
 
 # TODO add entry point to scrape/CRUD station files
-# TODO make server only entry point
-# TODO make ui only entry point with host option
-#      and start/embed server option
-def main(args=sys.argv[1:]):
+# TODO host option to opts
+def main(do_ui, args=sys.argv[1:]):
     try:
-        opts, args = getopt(args, 'hu', ['help', 'ui'])
+        opts, args = getopt(args, 'h', ['help'])
     except GetoptError:
         usage()
         return 2
-    do_ui = False
     for opt, arg in opts:
-        if opt in('-u', '--ui'):
-            do_ui = True
-        elif opt in('-h', '--help'):
+        if opt in ['-h', '--help']:
             usage()
             return 0
         else:
@@ -74,5 +68,13 @@ def main(args=sys.argv[1:]):
     return 0
 
 
+def main_ui():
+    return main(True)
+
+
+def main_serv():
+    return main(False)
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main_serv())
