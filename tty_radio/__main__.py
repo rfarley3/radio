@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import sys
+from time import sleep
+from threading import Thread
 from getopt import getopt, GetoptError
 
-from .ui import ui, term_hw
+from .ui import ui
+from .api import Server
+from .ui import term_hw
 from .color import colors
 from .banner import bannerize
+
 
 
 USAGE = """\
@@ -37,6 +42,9 @@ def usage():
 
 
 # TODO add entry point to scrape/CRUD station files
+# TODO make server only entry point
+# TODO make ui only entry point with host option
+#      and start/embed server option
 def main(args=sys.argv[1:]):
     try:
         opts, args = getopt(args, 'hu', ['help', 'ui'])
@@ -60,6 +68,7 @@ def main(args=sys.argv[1:]):
     st = Thread(target=s.run)
     st.daemon = True
     st.start()
+    sleep(0.5)
     ui()
     # TODO clean up thread, mpg123
     return 0

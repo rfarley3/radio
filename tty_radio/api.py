@@ -39,7 +39,9 @@ class Server(object):
         route('/api/v1/stations')(self.stations)
         route('/api/v1/streams')(self.streams)
         route('/api/v1/<station>/streams')(self.streams)
+        route('/api/v1/<station>')(self.station)
         post('/api/v1/<station>')(self.set)
+        route('/api/v1/<station>/<stream>')(self.stream)
         post('/api/v1/<station>/<stream>')(self.set)
         route('/api/v1/play')(self.play)
         route('/api/v1/pause')(self.pause)
@@ -59,6 +61,50 @@ class Server(object):
             'station': self.radio.station,
             'stream': self.radio.stream,
             'song': self.radio.song
+        }
+        return json.dumps({'success': success, 'resp': resp}) + '\n'
+
+    def station(self, station):
+        found_st = self.radio.station_obj(station)
+        success = False
+        name = None
+        ui_b = None
+        file = None
+        rebuild = None
+        if found_st is not None:
+            success = True
+            name = found_st.name
+            ui_b = found_st.ui_banner
+            file = found_st.file
+            rebuild = found_st.rebuild
+        resp = {
+            'name': name,
+            'ui_banner': ui_b,
+            'file': file,
+            'rebuild': rebuild,
+        }
+        return json.dumps({'success': success, 'resp': resp}) + '\n'
+
+    def stream(self, station, stream):
+        found_stn = self.radio.station_obj(station)
+        if found_stn is None:
+            # TODO resp
+            return json.dumps({'success': False}) + '\n'
+        fount_stm = found_stn.stream_obj(stream)
+        if fount_stm is None:
+            # TODO resp
+            return json.dumps({'success': False}) + '\n'
+        success = True
+        resp = {
+            'station': fount_stm.station,
+            'name': fount_stm.name,
+            'url': fount_stm.url,
+            'desc': fount_stm.desc,
+            'art': fount_stm.art,
+            'meta_name': fount_stm.None,
+            'meta_song': fount_stm.None,
+            'is_playing': fount_stm.False,
+            'is_paused': fount_stm.False,
         }
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
@@ -146,33 +192,47 @@ class Client(object):
             raise ApiConnError(e)
         return resp_val
 
-    def status(self):
+    def status(self, station=None):
         rjson = self.get('status')
-        if not rjson['success']:
+        if rjson is None or not rjson['success']:
+            print('API request failure: %s' % rjson)
+            return None
+        return rjson['resp']
+
+    def station(self):
+        rjson = self.get('station')
+        if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return None
         return rjson['resp']
 
     def stations(self):
         rjson = self.get('stations')
-        if not rjson['success']:
+        if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return []
         return rjson['resp']['stations']
+
+    def stream(self, station, stream):
+        rjson = self.get('%s/%s' % (station, stream))
+        if rjson is None or not rjson['success']:
+            print('API request failure: %s' % rjson)
+            return None
+        return rjson['resp']
 
     def streams(self, station=None):
         if station is None:
             rjson = self.get('streams')
         else:
             rjson = self.get('%s/streams' % station)
-        if not rjson['success']:
+        if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return []
         return rjson['resp']['streams']
 
     def set(self, station, stream):
         rjson = self.post('%s/%s' % (station, stream))
-        if not rjson['success']:
+        if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
         return True
@@ -183,21 +243,21 @@ class Client(object):
             self.set(station, stream)
             # TODO error check
         rjson = self.get('play')
-        if not rjson['success']:
+        if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
         return True
 
     def pause(self):
         rjson = self.get('pause')
-        if not rjson['success']:
+        if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
         return True
 
     def stop(self):
         rjson = self.get('stop')
-        if not rjson['success']:
+        if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
         return True

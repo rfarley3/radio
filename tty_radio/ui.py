@@ -24,6 +24,7 @@ from .color import colors
 from .banner import bannerize
 from .album import gen_art
 from .stationfile import get_station_streams
+from .api import Client
 
 # TODO
 #   make Station class to hold:
@@ -278,57 +279,63 @@ def get_choice(station, keys):
 def ui():
     # set term title
     sys.stdout.write("\x1b]0;" + "~=radio tuner=~" + "\x07")
-    try:
-        while(1):
-            ui_loop()
-    except KeyboardInterrupt:
-        pass
+    c = Client()
+    do_another = True
+    next_st = 'favs'
+    while do_another:
+        try:
+            next_st = ui_loop(c, next_st)
+        except KeyboardInterrupt:
+            do_another = False
+        if next_st == 'q':
+            do_another = False
     # clear term title
     sys.stdout.write("\x1b]0;" + "\x07")
 
 
-def ui_loop()
+def ui_loop(client, station='favs'):
     """list possible stations, read user input, and call player"""
     # when the player is exited, this loop happens again
-    (term_w, term_h) = term_hw()
-    streams = get_station_streams(station)
+    c = client
+    deets = c.station(station)
+    streams = c.streams(station)
     # ######
     # print stations
-    title = "Radio Tuner"
-    if station == 'soma':
-        title = "SomaFM Tuner"
+    (term_w, term_h) = term_hw()
     with colors("red"):
-        (banner, font) = bannerize(title, term_w)
+        (banner, font) = bannerize(deets['ui_banner'], term_w)
         b_IO = StringIO(banner)
         b_h = len(b_IO.readlines())
-        print(banner)  # , end='')
+        print(banner)
         b_h += 1
-    (keys, line_cnt) = print_streams(streams, term_w, station)
+    (keys, line_cnt) = print_streams(streams, term_w, station) # TODO port
     loop_line_cnt = line_cnt + b_h + 2
     loop_line_cnt += 1
     if term_h > loop_line_cnt:
         print('\n' * (term_h - loop_line_cnt - 1))
-    (stream_num, station) = get_choice(station, keys)
+    (stream_num, station) = get_choice(station, keys) # TODO port
     if station == 'q':
-        return
+        return 'q'
     # no stream given, must have been a station change, refresh list
     if stream_num is None:
-        continue
+        return station
     # ######
     # otherwise stream num specified, so call player
-    display_album(streams[stream_num])
-    display_banner(streams[stream_num])
-    play_stream(streams[stream_num])
+    stream = c.stream(station, streams[stream_num])
+    display_album(stream['art'])
+    display_banner(stream) # TODO port
+    play_stream(stream) # TODO port
 
 
-def display_album(stream):
-    if stream[3] == "":
+def display_album(art_url):
+    if art_url is None or art_url == '':
+        return
+    (term_w, term_h) = term_hw()
+    art = gen_art(art, term_w, term_h)
+    if art is None:
         return
     print("ASCII Printout of Station's Logo:")
-    (term_w, term_h) = term_hw()
-    art = gen_art(stream[3], term_w, term_h)
-    if art is not None:
-        print(art)
+    print(art)
 
 
 def display_banner(stream):

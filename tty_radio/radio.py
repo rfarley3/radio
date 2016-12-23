@@ -28,6 +28,13 @@ class Radio(object):
         if station_name != self.station:
             self.set(station_name)
 
+    def station_obj(self, station):
+        found_st = None
+        possibles = [st for st in self._stations if station == st.name]
+        if len(possibles) != 1:
+            return None
+        return possibles[0]
+
     @property
     def stream(self):
         if self._stream is None:
@@ -70,20 +77,20 @@ class Radio(object):
         if self.is_playing:
             print('Error, stop stream before set')
             return False
-        objs = [st for st in self._stations if st.name == station_name]
-        if len(objs) != 1:
+        obj = self.station_obj(station_name)
+        if obj is None
             print('Error, no matching station')
             return False
-        self._station = objs[0]
+        self._station = obj
         self._stream = None
         if stream_name is None:
             return True
         streams = self._station.streams
-        objs = [st for st in streams if st.name == stream_name]
-        if len(objs) != 1:
+        obj = self._station.stream_obj(stream_name)
+        if obj is None:
             print('Error, no matching stream')
             return False
-        self._stream = objs[0]
+        self._stream = obj
         return True
 
     def play(self, station_stream=None):

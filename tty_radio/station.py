@@ -18,6 +18,7 @@ if PY3:
 else:
     from urllib2 import urlopen
 
+from . import DEBUG
 from .stream import Stream
 
 # maximum age of any channel file before rebuilding it
@@ -27,6 +28,8 @@ FILE_EXT = '.csv'
 
 
 class Station(object):
+    ui_banner = 'Radio Tuner'
+
     def __init__(self, name, rebuild=True):
         self.name = name
         self.rebuild = rebuild
@@ -85,11 +88,21 @@ class Station(object):
                         row[3],
                         self.reader))
 
-    def reader(self, inp):
-        print('read line: %s' % inp)
+    def stream_obj(self, stream):
+        found_st = None
+        possibles = [st for st in self._streams if stream == st.name]
+        if len(possibles) != 1:
+            return None
+        return possibles[0]
+
+    def reader(self, line):
+        if DEBUG:
+            print('station sees: %s' % line)
 
 
 class Soma(Station):
+    ui_banner = 'SomaFM Tuner'
+
     def __init__(self):
         super(Soma, self).__init__(name='soma', rebuild=True)
         self.parse_url = "http://somafm.com"
@@ -153,6 +166,8 @@ class Soma(Station):
 
 
 class Favs(Station):
+    ui_banner = 'Favs Tuner'
+
     def __init__(self):
         super(Favs, self).__init__(name='favs', rebuild=False)
 
