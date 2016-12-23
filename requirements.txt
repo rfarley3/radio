@@ -1,3 +1,5 @@
 beautifulsoup4
 pyfiglet
 pillow
+bottle
+requests

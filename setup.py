@@ -16,10 +16,13 @@ setup(
     install_requires=[
         'beautifulsoup4',
         'pyfiglet',
+        'bottle',
+        'requests'
     ],
     entry_points={
         'console_scripts': [
-            'radio = tty_radio.__main__:main',
+            'radio = tty_radio.__main__:main_ui',
+            'radio_server = tty_radio.__main__:main_serv',
         ]
     },
 )
