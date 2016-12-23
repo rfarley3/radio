@@ -98,71 +98,6 @@ def print_streams(streams, term_w, station):
     return (keys, line_cnt - 1)
 
 
-def do_mpg123(url, prefix, show_deets=1):
-    # mpg123 command line mp3 stream player
-    # does unbuffered output, so the subprocess...readline snip works
-    # -C allows keyboard presses to send commands:
-    #    space is pause/resume, q is quit, +/- control volume
-    # -@ tells it to read (for stream/playlist info) filenames/URLs from url
-    subp_cmd = ["mpg123", "-f", VOL, "-C", "-@", url]
-    try:
-        p = subprocess.Popen(
-            subp_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT)
-    except OSError as e:
-        raise Exception('OSError %s when executing %s' % (e, subp_cmd))
-    delete_cnt = 0
-    has_deeted = False
-    has_titled = False
-    for line in iter(p.stdout.readline, b''):
-        out = bytes.decode(line)
-        out = out.strip()
-        if show_deets and not has_deeted and out[0:8] == "ICY-NAME":
-            parsed = parse_name(out[10:])
-            if parsed is not None:
-                pr_blk(parsed, prefix)
-            has_deeted = True
-        elif out[0:8] == "ICY-META":
-            parsed = parse_song(out[10:])
-            # confine song title to single line to look good
-            song_title = pr_blk(parsed, prefix, chomp=True, do_pr=False)
-            # this will delete the last song, and reuse its line
-            # (so output only has one song title line)
-            if COMPACT_TITLES:
-                if has_titled:
-                    del_prompt(delete_cnt)
-                else:
-                    has_titled = True
-            print(song_title)
-            sys.stdout.flush()
-            delete_cnt = len(song_title)
-    return delete_cnt
-
-
-def parse_name(station_deets):
-    # bc it's kinda poser having so much 'defcon' all over your screen
-    if station_deets[0:3] == "Def":
-        # print(">>> " +  station_deets)
-        return None
-    return station_deets
-
-
-def parse_song(metadata):
-    # example to parse:
-    # StreamTitle='Stone Soup Soldiers - Pharaoh's Tears';StreamUrl='http://SomaFM.com/suburbsofgoa/';)  # noqa
-    title_re = re.compile("le='([^;]*)';")
-    # print(">>> " +  out)
-    title_m = title_re.search(metadata)
-    title = "Song title didn't parse(" + metadata + ")"
-    try:
-        title = title_m.group(1)
-    except:  # TODO find actual exception
-        return title
-    title = re.sub(r'\s{2,}-', ' -', title)
-    return title
-
-
 def pr_blk(buf, prefix='', prefix_len=None, chomp=False, do_pr=True):
     if buf is None or buf == '':
         if not do_pr:
@@ -323,7 +258,7 @@ def ui_loop(client, station='favs'):
     stream = c.stream(station, streams[stream_num])
     display_album(stream['art'])
     display_banner(stream['name'])
-    play_stream(stream) # TODO port
+    play_stream(c, stream)
 
 
 def display_album(art_url):
@@ -370,7 +305,55 @@ def display_banner(stream_name):
                 print("")  # empty line for pretty factor
 
 
-def play_stream(stream):
+def play_stream(client, stream):
+    c = client
+    c.play(stream['station'], stream['name'])
+    # TODO poll for changes that mean we should update UI
+    # TODO poll to detect when stop has happened
+    # TODO poll user input to send stop
+
+
+def old_filter():
+    def do_mpg123(url, prefix, show_deets=1):
+        # mpg123 command line mp3 stream player
+        # does unbuffered output, so the subprocess...readline snip works
+        # -C allows keyboard presses to send commands:
+        #    space is pause/resume, q is quit, +/- control volume
+        # -@ tells it to read (for stream/playlist info) filenames/URLs from url
+        subp_cmd = ["mpg123", "-f", VOL, "-C", "-@", url]
+        try:
+            p = subprocess.Popen(
+                subp_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT)
+        except OSError as e:
+            raise Exception('OSError %s when executing %s' % (e, subp_cmd))
+        delete_cnt = 0
+        has_deeted = False
+        has_titled = False
+        for line in iter(p.stdout.readline, b''):
+            out = bytes.decode(line)
+            out = out.strip()
+            if show_deets and not has_deeted and out[0:8] == "ICY-NAME":
+                parsed = parse_name(out[10:])
+                if parsed is not None:
+                    pr_blk(parsed, prefix)
+                has_deeted = True
+            elif out[0:8] == "ICY-META":
+                parsed = parse_song(out[10:])
+                # confine song title to single line to look good
+                song_title = pr_blk(parsed, prefix, chomp=True, do_pr=False)
+                # this will delete the last song, and reuse its line
+                # (so output only has one song title line)
+                if COMPACT_TITLES:
+                    if has_titled:
+                        del_prompt(delete_cnt)
+                    else:
+                        has_titled = True
+                print(song_title)
+                sys.stdout.flush()
+                delete_cnt = len(song_title)
+        return delete_cnt
     replay = True
     show_station_deets = True
     while replay:
