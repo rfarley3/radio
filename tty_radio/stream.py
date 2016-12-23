@@ -104,6 +104,7 @@ def mpg_running():
 
 
 def parse_name(station_deets):
+    # TODO custom parsers inherited from station/stream
     # bc it's kinda poser having so much 'defcon' all over your screen
     if station_deets[0:3] == "Def":
         # print(">>> " +  station_deets)

@@ -4,6 +4,7 @@ import requests
 from bottle import run, route, post, request
 
 from . import DEBUG
+from .radio import Radio
 
 
 PORT = 7887
@@ -29,6 +30,8 @@ class Server(object):
         if addr is not None:
             (self.host, self.port) = addr
         self.radio = radio
+        if radio is None:
+            self.radio = Radio()
 
     def run(self):
         route('/api/v1/')(self.index)

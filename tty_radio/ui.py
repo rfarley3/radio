@@ -1,32 +1,4 @@
 from __future__ import print_function
-########################################
-# Streaming radio terminal client
-# v0.1.4           Convert to tty_radio
-# v0.1.3 25Sep2014 Added proxy support
-# v0.1.2  7Aug2014 Added favs
-# v0.1.1  6Mar2014 Added Di.FM
-# v0.0.0           based on https://gist.github.com/roamingryan/2343819
-# Designed to use mpg123, but you can use any player that doesn't buffer stdout
-#
-# To use:
-#   run radio or radio -h to see all the argument options
-#   select station at prompt be entering number found in left column
-#   enjoy
-#
-# TODO
-#   possibly move web-scraper to CLarg and only on demand (but alert if old)
-#   detect if stations fail
-#   ability to CRUD a favorites playlist
-#   make Station class to hold:
-#     web-scraper
-#     file builder
-#     main menu banner
-#     menu "other stations"/station switch items
-#     custom deets filters
-#   custom colors for stations/streams
-#   Non-dark terminal (white bg) theme
-#   use pr_blk in print_streams
-#
 import platform
 PY3 = False
 if platform.python_version().startswith('3'):
@@ -53,6 +25,14 @@ from .banner import bannerize
 from .album import gen_art
 from .stationfile import get_station_streams
 
+# TODO
+#   make Station class to hold:
+#     main menu banner
+#     menu "other stations"/station switch items
+#   custom colors for stations/streams
+#   Non-dark terminal (white bg) theme
+#   use pr_blk in print_streams
+#
 
 def print_streams(streams, term_w, station):
     keys = list(streams.keys())
@@ -295,39 +275,50 @@ def get_choice(station, keys):
     # should never be here
 
 
-def ui(station):
+def ui():
+    # set term title
+    sys.stdout.write("\x1b]0;" + "~=radio tuner=~" + "\x07")
+    try:
+        while(1):
+            ui_loop()
+    except KeyboardInterrupt:
+        pass
+    # clear term title
+    sys.stdout.write("\x1b]0;" + "\x07")
+
+
+def ui_loop()
     """list possible stations, read user input, and call player"""
     # when the player is exited, this loop happens again
-    while(1):
-        (term_w, term_h) = term_hw()
-        streams = get_station_streams(station)
-        # ######
-        # print stations
-        title = "Radio Tuner"
-        if station == 'soma':
-            title = "SomaFM Tuner"
-        with colors("red"):
-            (banner, font) = bannerize(title, term_w)
-            b_IO = StringIO(banner)
-            b_h = len(b_IO.readlines())
-            print(banner)  # , end='')
-            b_h += 1
-        (keys, line_cnt) = print_streams(streams, term_w, station)
-        loop_line_cnt = line_cnt + b_h + 2
-        loop_line_cnt += 1
-        if term_h > loop_line_cnt:
-            print('\n' * (term_h - loop_line_cnt - 1))
-        (stream_num, station) = get_choice(station, keys)
-        if station == 'q':
-            return
-        # no stream given, must have been a station change, refresh list
-        if stream_num is None:
-            continue
-        # ######
-        # otherwise stream num specified, so call player
-        display_album(streams[stream_num])
-        display_banner(streams[stream_num])
-        play_stream(streams[stream_num])
+    (term_w, term_h) = term_hw()
+    streams = get_station_streams(station)
+    # ######
+    # print stations
+    title = "Radio Tuner"
+    if station == 'soma':
+        title = "SomaFM Tuner"
+    with colors("red"):
+        (banner, font) = bannerize(title, term_w)
+        b_IO = StringIO(banner)
+        b_h = len(b_IO.readlines())
+        print(banner)  # , end='')
+        b_h += 1
+    (keys, line_cnt) = print_streams(streams, term_w, station)
+    loop_line_cnt = line_cnt + b_h + 2
+    loop_line_cnt += 1
+    if term_h > loop_line_cnt:
+        print('\n' * (term_h - loop_line_cnt - 1))
+    (stream_num, station) = get_choice(station, keys)
+    if station == 'q':
+        return
+    # no stream given, must have been a station change, refresh list
+    if stream_num is None:
+        continue
+    # ######
+    # otherwise stream num specified, so call player
+    display_album(streams[stream_num])
+    display_banner(streams[stream_num])
+    play_stream(streams[stream_num])
 
 
 def display_album(stream):
