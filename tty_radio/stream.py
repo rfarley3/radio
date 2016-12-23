@@ -1,6 +1,12 @@
 from __future__ import print_function
 from threading import Thread
-import subprocess
+from time import sleep
+from subprocess import (
+    Popen,
+    PIPE,
+    STDOUT,
+    check_output,
+    CalledProcessError)
 import re
 
 from . import VOL
@@ -31,25 +37,44 @@ class Stream(object):
     def is_playing(self):
         return self._is_playing
 
+    @property
+    def is_paused(self):
+        return self._is_paused
+
     def play(self):
-        self._is_playing = True
-        self._is_paused = False
         self.thread = Thread(
             target=mpg123,
             args=(self.url, self.get_subproc, self.reader))
         self.thread.daemon = True
         self.thread.start()
+        while not mpg_running():
+            sleep(0.5)
+        self._is_playing = True
+        self._is_paused = False
 
     def get_subproc(self, subproc):
         self._subproc = subproc
 
+    def kill_subproc(self):
+        self._subproc.terminate()
+
     def pause(self):
-        self._subproc.kill()
+        self.kill_subproc()
+        while mpg_running():
+            sleep(0.5)
         self._is_paused = True
+        # since we are killing the proc forget everything
+        self.meta_song = None
+        self.meta_name = None
 
     def stop(self):
-        self._subproc.kill()
+        self.kill_subproc()
+        while mpg_running():
+            sleep(0.5)
         self._is_playing = False
+        # since we are killing the proc forget everything
+        self.meta_song = None
+        self.meta_name = None
 
     def reader(self, inp):
         if (self.meta_name is None and
@@ -62,6 +87,20 @@ class Stream(object):
                 song = None
             self.meta_song = song
         self.station_reader(inp)
+
+
+def mpg_running():
+    # searching for mpg123 reveals an orphaned process in parens (mpg123)
+    # so search for 'mpg123 '
+    try:
+        grep = check_output("ps | grep -v grep | grep 'mpg123 '", shell=True)
+    except CalledProcessError:
+        return False
+    grep = grep.decode('ascii').strip()
+    if len(grep) > 1:
+        print('%s' % grep)
+        return True
+    return False
 
 
 def parse_name(station_deets):
@@ -95,11 +134,7 @@ def mpg123(url, get_p, stream_reader):
     # -@ tells it to read (for stream/playlist info) filenames/URLs from url
     subp_cmd = ["mpg123", "-f", VOL, "-@", url]
     try:
-        p = subprocess.Popen(
-            subp_cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT)
+        p = Popen(subp_cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
     except OSError as e:
         raise Exception('OSError %s when executing %s' % (e, subp_cmd))
     get_p(p)

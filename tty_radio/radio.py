@@ -58,8 +58,10 @@ class Radio(object):
 
     def set(self, station_name, stream_name=None):
         if stream_name is None and station_name == self.station:
+            print('Ignoring, station is same for set')
             return True
         if station_name == self.station and stream_name == self.stream:
+            print('Ignoring, station and stream are same for set')
             return True
         if self.is_playing:
             print('Error, stop stream before set')
@@ -82,9 +84,6 @@ class Radio(object):
 
     def play(self, station_stream=None):
         if self.is_playing and not self.is_paused:
-            print('Error, pause stream before play')
-            return (None, None)
-        if self.is_playing:
             print('Error, stop/pause stream before play')
             return (None, None)
         if station_stream is not None:
@@ -102,9 +101,5 @@ class Radio(object):
         return (self.station, self.stream)
 
     def stop(self):
-        station_orig = self.station
-        stream_orig = self.stream
         self._stream.stop()
-        self._station = None
-        self._stream = None
-        return (station_orig, stream_orig)
+        return (self.station, self.stream)
