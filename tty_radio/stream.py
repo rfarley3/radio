@@ -27,7 +27,7 @@ class Stream(object):
         self._subproc = None
 
     def __str__(self):
-        return ('Stream(station=%s,name=%s,url=%s,desc=%s,art=%s)' %
+        return ('Stream(station=%s,name=%s,url=%s,desc=\"%s\",art=%s)' %
                 (self.station, self.name, self.url, self.desc, self.art))
 
     def __repr__(self):
@@ -81,6 +81,8 @@ class Stream(object):
                 len(inp) > 10 and
                 inp[0:8] == "ICY-NAME"):
             self.meta_name = parse_name(inp[10:])
+            if self.meta_song is None:
+                self.meta_song = self.meta_name
         if len(inp) > 10 and inp[0:8] == "ICY-META":
             song = parse_song(inp[10:])
             if song is not None and len(song) == 0:

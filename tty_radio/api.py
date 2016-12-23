@@ -62,16 +62,20 @@ class Server(object):
     def stations(self):
         success = True
         resp = {
-            'stations': [st.name for st in self.radio.stations]
+            'stations': self.radio.stations
         }
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
     def streams(self, station=None):
         streams = []
-        for st in self.radio.stations:
+        for st in self.radio._stations:
             if station is None or st.name == station:
-                streams.extend(st.streams)
+                streams_str = [str(s) for s in st.streams]
+                streams.extend(streams_str)
         success = True
+        if (station is not None and
+                station not in [st.name for st in self.radio._stations]):
+            success = False
         resp = {
             'streams': streams
         }

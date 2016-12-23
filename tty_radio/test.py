@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 from time import sleep, time
 import sys
+from json import loads
 from tty_radio.radio import Radio
 from tty_radio.stream import mpg_running
+from tty_radio.api import Server
 
 
-if __name__ == "__main__":
+def test_obj():
     r = Radio()
     i = 0
     print('%02d>>> r:%s' % (i, r))
@@ -121,3 +123,135 @@ if __name__ == "__main__":
         print('%02d>>> Failed set test 5' % i)
         sys.exit(1)
     sys.exit(0)
+
+
+def test_api_serv():
+    r = Radio()
+    s = Server(radio=r)
+    i = 0
+    r = s.index()
+    print('%02d>>> s.index:%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.status()
+    print('%02d>>> s.status:%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.stations()
+    print('%02d>>> s.stations:%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.streams()
+    print('%02d>>> s.streams:%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.streams('favs')
+    print('%02d>>> s.streams(favs):%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.streams('ewqrewrwer')
+    print('%02d>>> s.streams(ewqrewrwer):%s' % (i, r))
+    i += 1
+    if loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.set('favs')
+    print('%02d>>> s.set(favs):%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.set('ewqrewrwer')
+    print('%02d>>> s.set(ewqrewrwer):%s' % (i, r))
+    i += 1
+    if loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.set('favs', 'ewqrewrwer')
+    print('%02d>>> s.set(favs,ewqrewrwer):%s' % (i, r))
+    i += 1
+    if loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.set('favs', 'WCPE Classical')
+    print('%02d>>> s.set(favs,WCPE Classical):%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.play()
+    print('%02d>>> s.play:%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    sleep(10)
+    r = s.play()
+    print('%02d>>> double s.play:%s' % (i, r))
+    i += 1
+    if loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.set('favs', 'BAGeL Radio')
+    print('%02d>>> set during play s.set(favs,BAGeL Radio):%s' % (i, r))
+    i += 1
+    if loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.pause()
+    print('%02d>>> s.pause:%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    sleep(2)
+    # double pause currently allowed
+    # r = s.pause()
+    # print('%02d>>> double s.pause:%s' % (i, r))
+    # i += 1
+    # if loads(r)['success']:
+    #     print('%02d>>> Failed' % i)
+    #     sys.exit(1)
+    r = s.play()
+    print('%02d>>> s.play:%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    sleep(10)
+    r = s.status()
+    print('%02d>>> s.status:%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.stop()
+    print('%02d>>> s.stop:%s' % (i, r))
+    i += 1
+    if not loads(r)['success']:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = s.stop()
+    # double stop currently allowed
+    # print('%02d>>> double s.stop:%s' % (i, r))
+    # i += 1
+    # if loads(r)['success']:
+    #     print('%02d>>> Failed' % i)
+    #     sys.exit(1)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    # test_obj()
+    test_api_serv()
+    # test_api_client()
