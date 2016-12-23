@@ -11,7 +11,6 @@ if PY3:
 else:
     from urllib import unquote
 
-from . import DEBUG
 from .radio import Radio
 
 
@@ -19,7 +18,7 @@ from .radio import Radio
 #   Create bootstrap frontend from '/'
 #
 
-
+BOTTLE_DEBUG = False
 PORT = 7887
 
 
@@ -59,7 +58,7 @@ class Server(object):
         route('/api/v1/play')(self.play)
         route('/api/v1/pause')(self.pause)
         route('/api/v1/stop')(self.stop)
-        run(host=self.host, port=self.port, debug=DEBUG)
+        run(host=self.host, port=self.port, debug=BOTTLE_DEBUG, quiet=True)
 
     # TODO load a js frontend
     def index(self):
@@ -114,11 +113,11 @@ class Server(object):
         is_paused = None
         found_stn = self.radio.station_obj(station_search)
         if found_stn is not None:
-            print('fstn %s' % found_stn)
-            print('searching %s' % stream)
+            # print('fstn %s' % found_stn)
+            # print('searching %s' % stream)
             found_stm = found_stn.stream_obj(stream)
             if found_stm is not None:
-                print('fstm %s' % found_stm)
+                # print('fstm %s' % found_stm)
                 success = True
                 station = found_stm.station
                 name = found_stm.name

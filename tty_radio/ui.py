@@ -9,6 +9,7 @@ import os
 import subprocess
 import re
 import math
+from time import sleep
 from io import StringIO
 if PY3:
     get_input = input
@@ -64,52 +65,25 @@ def print_streams(station, streams, stations):
     # print the stations
     i = 0
     for s in streams:
-        # print " %i) %s"%(i,streams[i][1])
-        with colors("yellow"):
-            sys.stdout.write(
-                " %2d" % i + " ) " + s['name'] +
-                ' ' * (name_len - len(s['name'])))
-        with colors("green"):
-            # print("desc" + desc[i])
-            lines = textwrap.wrap(s['desc'], desc_len - 6)
-            line_cnt += len(lines)
-            print(lines[0])
-            for line in lines[1:]:
-                print(' ' * (name_len + 6) + line)
+        prefix = (" %2d" % i + " ) " + s['name'] +
+                  ' ' * (name_len - len(s['name'])))
+        (w, h) = print_blockify(prefix, 'yellow', s['desc'], 'green')
+        line_cnt += h
         i += 1
 
     # TODO port/simplify/generalize
-    # print the hard coded access to the other station files pt 1
+    # print the hard coded access to the other station
+    prefix = (" %2d" % len(streams) + " ) SomaFM" +
+              ' ' * (name_len - len("SomaFM")))
+    desc = ("Enter " + str(len(streams)) +
+            " or 's' to show SomaFM streams")
     if station == "soma":
-        with colors("yellow"):
-            sys.stdout.write(
-                " %2d" % len(streams) + " ) Favorites" +
-                ' ' * (name_len - len("Favorites")))
-        with colors("green"):
-            lines = []
-            lines = textwrap.wrap(
-                "Enter " + str(len(streams)) +
-                " or 'f' to show favorite streams",
-                desc_len - 6)
-            line_cnt += len(lines)
-            print(lines[0])
-            for line in lines[1:]:
-                print(' ' * (name_len + 6) + line)
-    elif station == "favs":
-        with colors("yellow"):
-            sys.stdout.write(
-                " %2d" % len(streams) + " ) SomaFM" +
-                ' ' * (name_len - len("SomaFM")))
-        with colors("green"):
-            lines = []
-            lines = textwrap.wrap(
-                "Enter " + str(len(streams)) +
-                " or 's' to show SomaFM streams",
-                desc_len - 6)
-            line_cnt += len(lines)
-            print(lines[0])
-            for line in lines[1:]:
-                print(' ' * (name_len + 6) + line)
+        prefix = (" %2d" % len(streams) + " ) Favorites" +
+                  ' ' * (name_len - len("Favorites")))
+        desc = ("Enter " + str(len(streams)) +
+                " or 'f' to show favorite streams")
+    (w, h) = print_blockify(prefix, 'yellow', desc, 'green')
+    line_cnt += h
     return line_cnt - 1
 
 
@@ -253,8 +227,52 @@ def ui_loop(client, station='favs'):
         return station
     display_album(stream['art'])
     display_banner(stream['name'])
-    play_stream(c, stream)
+    station_stream = (stream['station'], stream['name'])
+    c.play(station_stream)
+    i = 0
+    disp_name = stream['meta_name']
+    while i < 10 and disp_name is None:
+        stream = c.stream(station, to_stream['name'])
+        disp_name = stream['meta_name']
+        sleep(1)
+        i += 1
+    if disp_name is None:
+        disp_name = stream['name']
+    print_blockify('>>> ', 'blue', disp_name, 'blue')
+    sleep(10)
+    c.stop()
+    # TODO poll for changes that mean we should update UI
+    # TODO reincorporate compact titles
+    # TODO poll to detect when stop has happened
+    # TODO poll user input to send stop
     return station
+
+
+def print_blockify(prefix='', prefix_color='endc',
+                   blk='', blk_color='endc',
+                   wrap=True):
+    # NOTE won't print only prefix without blk
+    if len(blk) == 0:
+        return (0, 0)
+    p_len = len(prefix)
+    with colors(prefix_color):
+        # sys.stdout.write && flush
+        print(prefix, end='')
+    (term_w, term_h) = term_hw()
+    lines = textwrap.wrap(blk, term_w - p_len)
+    max_blk_len = len(lines[0])
+    with colors(blk_color):
+        print(lines[0])
+    if not wrap:
+        return (len(prefix) + max_blk_len, 1)
+    # prefix only appears on 1st line, justifying remainder
+    prefix = ' ' * p_len
+    for line in lines[1:]:
+        if len(line) > max_blk_len:
+            max_blk_len = len(line)
+        with colors(blk_color):
+            print(prefix + line)
+    return (max_blk_len, len(lines))
 
 
 def display_album(art_url):
@@ -301,38 +319,7 @@ def display_banner(stream_name):
                 print("")  # empty line for pretty factor
 
 
-def play_stream(client, stream):
-    c = client
-    station_stream = (stream['station'], stream['name'])
-    c.play(station_stream)
-    # TODO poll for changes that mean we should update UI
-    # TODO reincorporate compact titles
-    # TODO poll to detect when stop has happened
-    # TODO poll user input to send stop
-
-
-def old_filter(stream, parse_name, parse_song):  # noqa
-    def pr_blk(buf, prefix='', prefix_len=None, chomp=False, do_pr=True):
-        if buf is None or buf == '':
-            if not do_pr:
-                return ''
-            return
-        if prefix_len is None:
-            prefix_len = len(prefix)
-        (term_w, term_h) = term_hw()
-        if chomp and len(buf) > (term_w - prefix_len):
-            msg = prefix + buf[0:(term_w - prefix_len)]
-            if not do_pr:
-                return msg
-            print(msg)
-        lines = textwrap.wrap(buf, term_w - prefix_len)
-        msg = prefix + lines[0]
-        for line in lines[1:]:
-            msg += ' ' * prefix_len + line
-        if not do_pr:
-            return msg
-        print(msg)
-
+def old_filter(stream, parse_name, parse_song, pr_blk):  # noqa
     def do_mpg123(url, prefix, show_deets=1):
         # mpg123 command line mp3 stream player
         # does unbuffered output, so the subprocess...readline snip works

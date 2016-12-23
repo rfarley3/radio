@@ -98,7 +98,7 @@ def mpg_running():
         return False
     grep = grep.decode('ascii').strip()
     if len(grep) > 1:
-        print('%s' % grep)
+        # print('%s' % grep)
         return True
     return False
 
