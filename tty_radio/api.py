@@ -1,10 +1,18 @@
 from __future__ import print_function
+import platform
+PY3 = False
+if platform.python_version().startswith('3'):
+    PY3 = True
 import json
 import requests
 from bottle import run, route, post, request
 
 from . import DEBUG
 from .radio import Radio
+if PY3:
+    from urllib.parse import unquote
+else:
+    from urllib import unquote
 
 
 PORT = 7887
@@ -65,46 +73,67 @@ class Server(object):
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
     def station(self, station):
-        found_st = self.radio.station_obj(station)
+        station = unquote(station)
         success = False
         name = None
-        ui_b = None
+        ui_n = None
         file = None
         rebuild = None
+        found_st = self.radio.station_obj(station)
         if found_st is not None:
             success = True
             name = found_st.name
-            ui_b = found_st.ui_banner
+            ui_n = found_st.ui_name
             file = found_st.file
             rebuild = found_st.rebuild
         resp = {
             'name': name,
-            'ui_banner': ui_b,
+            'ui_name': ui_n,
             'file': file,
             'rebuild': rebuild,
         }
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
     def stream(self, station, stream):
-        found_stn = self.radio.station_obj(station)
-        if found_stn is None:
-            # TODO resp
-            return json.dumps({'success': False}) + '\n'
-        fount_stm = found_stn.stream_obj(stream)
-        if fount_stm is None:
-            # TODO resp
-            return json.dumps({'success': False}) + '\n'
-        success = True
+        station_search = unquote(station)
+        stream = unquote(stream)
+        success = False
+        station = None
+        name = None
+        url = None
+        desc = None
+        art = None
+        meta_name = None
+        meta_song = None
+        is_playing = None
+        is_paused = None
+        found_stn = self.radio.station_obj(station_search)
+        if found_stn is not None:
+            print('fstn %s' % found_stn)
+            print('searching %s' % stream)
+            found_stm = found_stn.stream_obj(stream)
+            if found_stm is not None:
+                print('fstm %s' % found_stm)
+                success = True
+                station = found_stm.station
+                name = found_stm.name
+                url = found_stm.url
+                desc = found_stm.desc
+                art = found_stm.art
+                meta_name = found_stm.meta_name
+                meta_song = found_stm.meta_song
+                is_playing = found_stm.is_playing
+                is_paused = found_stm.is_paused
         resp = {
-            'station': fount_stm.station,
-            'name': fount_stm.name,
-            'url': fount_stm.url,
-            'desc': fount_stm.desc,
-            'art': fount_stm.art,
-            'meta_name': fount_stm.None,
-            'meta_song': fount_stm.None,
-            'is_playing': fount_stm.False,
-            'is_paused': fount_stm.False,
+            'station': station,
+            'name': name,
+            'url': url,
+            'desc': desc,
+            'art': art,
+            'meta_name': meta_name,
+            'meta_song': meta_song,
+            'is_playing': is_playing,
+            'is_paused': is_paused,
         }
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
@@ -116,6 +145,8 @@ class Server(object):
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
     def streams(self, station=None):
+        if station is not None:
+            station = unquote(station)
         streams = []
         for st in self.radio._stations:
             if station is None or st.name == station:
@@ -131,6 +162,9 @@ class Server(object):
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
     def set(self, station, stream=None):
+        station = unquote(station)
+        if stream is not None:
+            stream = unquote(stream)
         success = self.radio.set(station, stream)
         resp = 'Setting active stream to %s %s' % (station, stream)
         return json.dumps({'success': success, 'resp': resp}) + '\n'
@@ -199,8 +233,8 @@ class Client(object):
             return None
         return rjson['resp']
 
-    def station(self):
-        rjson = self.get('station')
+    def station(self, station):
+        rjson = self.get('%s' % station)
         if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return None

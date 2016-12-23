@@ -28,7 +28,7 @@ FILE_EXT = '.csv'
 
 
 class Station(object):
-    ui_banner = 'Radio Tuner'
+    ui_name = 'Radio'
 
     def __init__(self, name, rebuild=True):
         self.name = name
@@ -89,7 +89,7 @@ class Station(object):
                         self.reader))
 
     def stream_obj(self, stream):
-        possibles = [st for st in self._streams if stream == st.name]
+        possibles = [st for st in self.streams if stream == st.name]
         if len(possibles) != 1:
             return None
         return possibles[0]
@@ -100,7 +100,7 @@ class Station(object):
 
 
 class Soma(Station):
-    ui_banner = 'SomaFM Tuner'
+    ui_name = 'SomaFM'
 
     def __init__(self):
         super(Soma, self).__init__(name='soma', rebuild=True)
@@ -165,7 +165,7 @@ class Soma(Station):
 
 
 class Favs(Station):
-    ui_banner = 'Favs Tuner'
+    ui_name = 'Favorites'
 
     def __init__(self):
         super(Favs, self).__init__(name='favs', rebuild=False)

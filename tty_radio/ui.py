@@ -31,49 +31,66 @@ from .api import Client
 #     menu "other stations"/station switch items
 #   custom colors for stations/streams
 #   Non-dark terminal (white bg) theme
-#   use pr_blk in print_streams
 #
 
-def print_streams(streams, term_w, station):
-    keys = list(streams.keys())
+def stream_list(streams):
+    exploded = []
+    name_re = re.compile("name=(.*),url")
+    desc_re = re.compile("desc=\"(.*)\",art")
+    for s in streams:
+        name_m = name_re.search(s)
+        desc_m = desc_re.search(s)
+        s_exp = {
+            'name': name_m.group(1),
+            'desc': desc_m.group(1),
+            'repr': s
+        }
+        exploded.append(s_exp)
+    return exploded
+
+
+def print_streams(station, streams, stations):
+    (term_w, term_h) = term_hw()
     line_cnt = 0
-    if len(keys) == 0:
+    if len(streams) == 0:
         print("Exiting, empty station file, delete it and rerun")
         sys.exit(1)
-    keys.sort()
     # set up to pretty print station data
     # get left column width
-    name_len = max([len(streams[a][1]) for a in streams]) + 1
+    name_len = max([len(s['name']) for s in streams]) + 1
     desc_len = term_w - name_len
     # the first line has the name
     # each subsequent line has whitespace up to column begin mark
     # desc_first_line_fmt = "{{0:{0}}}".format(desc_len)
     # desc_nth_line_fmt   = ' ' * (name_len + 4) + desc_first_line_fmt
     # print the stations
-    for i in keys:
+    i = 0
+    for s in streams:
         # print " %i) %s"%(i,streams[i][1])
         with colors("yellow"):
             sys.stdout.write(
-                " %2d" % i + " ) " + streams[i][1] +
-                ' ' * (name_len - len(streams[i][1])))
+                " %2d" % i + " ) " + s['name'] +
+                ' ' * (name_len - len(s['name'])))
         with colors("green"):
             # print("desc" + desc[i])
-            lines = textwrap.wrap(streams[i][2], desc_len - 6)
+            lines = textwrap.wrap(s['desc'], desc_len - 6)
             line_cnt += len(lines)
             print(lines[0])
             for line in lines[1:]:
                 print(' ' * (name_len + 6) + line)
+        i += 1
 
+    # TODO port/simplify/generalize
     # print the hard coded access to the other station files pt 1
     if station == "soma":
         with colors("yellow"):
             sys.stdout.write(
-                " %2d" % len(keys) + " ) Favorites" +
+                " %2d" % len(streams) + " ) Favorites" +
                 ' ' * (name_len - len("Favorites")))
         with colors("green"):
             lines = []
             lines = textwrap.wrap(
-                "Enter " + str(len(keys)) +
+                "Enter " + str(len(streams)) +
                 " or 'f' to show favorite streams",
                 desc_len - 6)
             line_cnt += len(lines)
@@ -83,48 +100,19 @@ def print_streams(streams, term_w, station):
     elif station == "favs":
         with colors("yellow"):
             sys.stdout.write(
-                " %2d" % len(keys) + " ) SomaFM" +
+                " %2d" % len(streams) + " ) SomaFM" +
                 ' ' * (name_len - len("SomaFM")))
         with colors("green"):
             lines = []
             lines = textwrap.wrap(
-                "Enter " + str(len(keys)) +
+                "Enter " + str(len(streams)) +
                 " or 's' to show SomaFM streams",
                 desc_len - 6)
             line_cnt += len(lines)
             print(lines[0])
             for line in lines[1:]:
                 print(' ' * (name_len + 6) + line)
-    return (keys, line_cnt - 1)
-
-
-def pr_blk(buf, prefix='', prefix_len=None, chomp=False, do_pr=True):
-    if buf is None or buf == '':
-        if not do_pr:
-            return ''
-        return
-    if prefix_len is None:
-        prefix_len = len(prefix)
-    (term_w, term_h) = term_hw()
-    if chomp and len(buf) > (term_w - prefix_len):
-        msg = prefix + buf[0:(term_w - prefix_len)]
-        if not do_pr:
-            return msg
-        print(msg)
-    lines = textwrap.wrap(buf, term_w - prefix_len)
-    msg = prefix + lines[0]
-    for line in lines[1:]:
-        msg += ' ' * prefix_len + line
-    if not do_pr:
-        return msg
-    print(msg)
-
-
-def del_chars(num_chars):
-    print('\b' * num_chars, end='')  # move cursor to beginning of text
-    print(' '  * num_chars, end='')  # overwrite/delete all previous text
-    print('\b' * num_chars, end='')  # reset cursor for new text
-    return
+    return line_cnt - 1
 
 
 # \033[A moves cursor up 1 line
@@ -138,7 +126,6 @@ def del_prompt(num_chars):
     (term_w, term_h) = term_hw()
     move_up = int(math.ceil(float(num_chars) / float(term_w)))
     print("\033[A" * move_up + ' ' * num_chars + '\b' * (num_chars), end='')
-    return
 
 
 def term_hw():
@@ -187,16 +174,15 @@ def try_as_int(stream_num, station, max_val):
     return (stream_num, station)
 
 
-def get_choice(station, keys):
+def get_choice(station, streams):
     """Get user choice of stream to play, or station to change"""
-    stream_num = None
-    while stream_num not in keys:
+    while True:
         stream_num = read_input()
         if stream_num is None:
             continue
         ctrl_char = stream_num[0]
         if ctrl_char not in ['q', 'e', 's', 'f']:
-            retval = try_as_int(stream_num, station, len(keys))
+            retval = try_as_int(stream_num, station, len(streams))
             if retval is None:
                 continue
             else:
@@ -231,23 +217,28 @@ def ui_loop(client, station='favs'):
     """list possible stations, read user input, and call player"""
     # when the player is exited, this loop happens again
     c = client
+    if station is None:
+        station = c.stations()[0]
     deets = c.station(station)
-    streams = c.streams(station)
+    streams = stream_list(c.streams(station))
+    stations = c.stations()
+    # streams.sort()  # put in alpha order
     # ######
     # print stations
     (term_w, term_h) = term_hw()
+    banner_txt = deets['ui_name'] + ' Tuner'
     with colors("red"):
-        (banner, font) = bannerize(deets['ui_banner'], term_w)
+        (banner, font) = bannerize(banner_txt, term_w)
         b_IO = StringIO(banner)
         b_h = len(b_IO.readlines())
         print(banner)
         b_h += 1
-    (keys, line_cnt) = print_streams(streams, term_w, station) # TODO port
+    line_cnt = print_streams(station, streams, stations)
     loop_line_cnt = line_cnt + b_h + 2
     loop_line_cnt += 1
     if term_h > loop_line_cnt:
         print('\n' * (term_h - loop_line_cnt - 1))
-    (stream_num, station) = get_choice(station, keys) # TODO port
+    (stream_num, station) = get_choice(station, streams)
     if station == 'q':
         return 'q'
     # no stream given, must have been a station change, refresh list
@@ -255,10 +246,16 @@ def ui_loop(client, station='favs'):
         return station
     # ######
     # otherwise stream num specified, so call player
-    stream = c.stream(station, streams[stream_num])
+    to_stream = streams[stream_num]
+    # print(station, to_stream['name'])
+    stream = c.stream(station, to_stream['name'])
+    if stream is None:
+        print('Error, could not get stream details')
+        return station
     display_album(stream['art'])
     display_banner(stream['name'])
     play_stream(c, stream)
+    return station
 
 
 def display_album(art_url):
@@ -307,13 +304,35 @@ def display_banner(stream_name):
 
 def play_stream(client, stream):
     c = client
-    c.play(stream['station'], stream['name'])
+    station_stream = (stream['station'], stream['name'])
+    c.play(station_stream)
     # TODO poll for changes that mean we should update UI
     # TODO poll to detect when stop has happened
     # TODO poll user input to send stop
 
 
 def old_filter():
+    def pr_blk(buf, prefix='', prefix_len=None, chomp=False, do_pr=True):
+        if buf is None or buf == '':
+            if not do_pr:
+                return ''
+            return
+        if prefix_len is None:
+            prefix_len = len(prefix)
+        (term_w, term_h) = term_hw()
+        if chomp and len(buf) > (term_w - prefix_len):
+            msg = prefix + buf[0:(term_w - prefix_len)]
+            if not do_pr:
+                return msg
+            print(msg)
+        lines = textwrap.wrap(buf, term_w - prefix_len)
+        msg = prefix + lines[0]
+        for line in lines[1:]:
+            msg += ' ' * prefix_len + line
+        if not do_pr:
+            return msg
+        print(msg)
+
     def do_mpg123(url, prefix, show_deets=1):
         # mpg123 command line mp3 stream player
         # does unbuffered output, so the subprocess...readline snip works
@@ -354,6 +373,8 @@ def old_filter():
                 sys.stdout.flush()
                 delete_cnt = len(song_title)
         return delete_cnt
+    # end do_mpg123
+
     replay = True
     show_station_deets = True
     while replay:
