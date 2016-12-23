@@ -2,6 +2,21 @@ from __future__ import print_function
 import sys
 
 
+miami_vice = {
+    'ui_banner': 'red',
+    'ui_names': 'yellow',
+    'ui_desc': 'green',
+    'stream_name_banner': 'yellow',
+    'stream_name_confirm': 'purple',
+    'meta_prefix_str': '>>> ',
+    'meta_prefix': 'blue',
+    'meta_stream_name': 'blue',
+    'meta_song_name': 'blue',
+    'stream_exit_confirm': 'purple',
+}
+THEME = miami_vice
+
+
 class colors:
     COLORS = {
         'purple': '\033[95m',

@@ -19,7 +19,7 @@ else:
 from . import (
     VOL,
     COMPACT_TITLES)
-from .color import colors
+from .color import colors, THEME
 from .banner import bannerize
 from .album import gen_art
 from .api import Client
@@ -57,22 +57,19 @@ def print_streams(station, streams, stations):
     # set up to pretty print station data
     # get left column width
     name_len = max([len(s['name']) for s in streams]) + 1
-    desc_len = term_w - name_len
     # the first line has the name
     # each subsequent line has whitespace up to column begin mark
-    # desc_first_line_fmt = "{{0:{0}}}".format(desc_len)
-    # desc_nth_line_fmt   = ' ' * (name_len + 4) + desc_first_line_fmt
     # print the stations
     i = 0
     for s in streams:
         prefix = (" %2d" % i + " ) " + s['name'] +
                   ' ' * (name_len - len(s['name'])))
-        (w, h) = print_blockify(prefix, 'yellow', s['desc'], 'green')
+        (w, h) = print_blockify(
+            prefix, THEME['ui_names'],
+            s['desc'], THEME['ui_desc'])
         line_cnt += h
         i += 1
-
-    # TODO port/simplify/generalize
-    # print the hard coded access to the other station
+    # TODO get rid of hard coded access to the other stations
     prefix = (" %2d" % len(streams) + " ) SomaFM" +
               ' ' * (name_len - len("SomaFM")))
     desc = ("Enter " + str(len(streams)) +
@@ -82,7 +79,9 @@ def print_streams(station, streams, stations):
                   ' ' * (name_len - len("Favorites")))
         desc = ("Enter " + str(len(streams)) +
                 " or 'f' to show favorite streams")
-    (w, h) = print_blockify(prefix, 'yellow', desc, 'green')
+    (w, h) = print_blockify(
+        prefix, THEME['ui_names'],
+        desc, THEME['ui_desc'])
     line_cnt += h
     return line_cnt - 1
 
@@ -200,7 +199,7 @@ def ui_loop(client, station='favs'):
     # print stations
     (term_w, term_h) = term_hw()
     banner_txt = deets['ui_name'] + ' Tuner'
-    with colors("red"):
+    with colors(THEME['ui_banner']):
         (banner, font) = bannerize(banner_txt, term_w)
         b_IO = StringIO(banner)
         b_h = len(b_IO.readlines())
@@ -229,47 +228,63 @@ def ui_loop(client, station='favs'):
         return station
     display_album(stream['art'])
     display_banner(stream['name'])
-#     display_metadata()
-# def display_metadata():
-    station_stream = (stream['station'], stream['name'])
-    c.play(station_stream)
-    i = 0
-    disp_name = stream['meta_name']
-    while i < 10 and disp_name is None:
-        stream = c.stream(station, to_stream['name'])
-        disp_name = stream['meta_name']
-        sleep(1)
-        i += 1
-    if disp_name is None:
-        disp_name = stream['name']
-    print_blockify('>>> ', 'blue', disp_name, 'blue')
-    # wait for initial song
-    i = 0
-    song_len = 0
-    song_name = stream['meta_song']
-    while i < 10 and song_name is None:
-        stream = c.stream(station, to_stream['name'])
-        song_name = stream['meta_song']
-        sleep(1)
-        i += 1
-    if song_name is not None and song_name != '':
-        song_len = print_blockify('>>> ', 'blue', song_name, 'blue', wrap=False)[0]
-    # keep polling for title changes
-    do_another = True
-    while do_another:
-        song_now = c.status()['song']
-        if song_now != song_name and song_now is not None and song_now != '':
-            if COMPACT_TITLES and song_len > 0:
-                del_prompt(song_len)
-            song_len = print_blockify('>>> ', 'blue', song_now, 'blue', wrap=False)[0]
-            song_name = song_now
-        sleep(1)
+    display_metadata(c, stream)
     c.stop()
     # TODO poll for changes that mean we should update UI
     # TODO reincorporate compact titles
     # TODO poll to detect when stop has happened
     # TODO poll user input to send stop
     return station
+
+
+def display_metadata(client, stream):
+    c = client
+    station_name = stream['station']
+    stream_name = stream['name']
+    station_stream = (station_name, stream_name)
+    c.play(station_stream)
+    i = 0
+    disp_name = stream['meta_name']
+    # disp names of '', like DEF CON Radio will escape loop
+    while i < 10 and disp_name is None:
+        stream = c.stream(station_name, stream_name)
+        disp_name = stream['meta_name']
+        sleep(0.5)
+        i += 1
+    if disp_name is None:
+        disp_name = stream_name
+    if disp_name is not None and disp_name != '':
+        print_blockify(
+            THEME['meta_prefix_str'], THEME['meta_prefix'],
+            disp_name, THEME['meta_stream_name'])
+    # wait for initial song
+    i = 0
+    song_len = 0
+    song_name = stream['meta_song']
+    # song names of '', like WCPE will escape loop
+    while i < 10 and song_name is None:
+        stream = c.stream(station_name, stream_name)
+        song_name = stream['meta_song']
+        sleep(0.5)
+        i += 1
+    if song_name is not None and song_name != '':
+        song_len = print_blockify(
+            THEME['meta_prefix_str'], THEME['meta_prefix'],
+            song_name, THEME['meta_song_name'],
+            wrap=False)[0]
+    # keep polling for song title changes
+    do_another = True
+    while do_another:
+        song_now = c.status()['song']
+        if song_now != song_name and song_now is not None and song_now != '':
+            if COMPACT_TITLES and song_len > 0:
+                del_prompt(song_len)
+            song_len = print_blockify(
+                THEME['meta_prefix_str'], THEME['meta_prefix'],
+                song_now, THEME['meta_song_name'],
+                wrap=False)[0]
+            song_name = song_now
+        sleep(1)
 
 
 def print_blockify(prefix='', prefix_color='endc',
@@ -315,14 +330,14 @@ def display_banner(stream_name):
     while unhappy:
         (term_w, term_h) = term_hw()
         font = "unknown"
-        with colors("yellow"):
+        with colors(THEME['stream_name_banner']):
             (banner, font) = bannerize(stream_name, term_w)
             b_IO = StringIO(banner)
             b_height = len(b_IO.readlines())
             if term_h > (b_height + 3):  # Playing, Station Name, Song Title
                 print('\n' * (term_h - b_height - 2))
             print(banner, end='')
-        with colors("purple"):
+        with colors(THEME['stream_name_confirm']):
             prompt = "Press enter if you like banner"
             prompt += " (font: " + font + "), else any char then enter "
             try:
@@ -389,14 +404,14 @@ def old_filter(stream, parse_name, parse_song, pr_blk):  # noqa
     replay = True
     show_station_deets = True
     while replay:
-        with colors("blue"):
-            prefix = ">>> "
+        with colors(THEME['meta_prefix']):
+            prefix = THEME['meta_prefix_str']
             delete_cnt = do_mpg123(
                 stream[0],
                 prefix,
                 show_station_deets)
             del_prompt(delete_cnt)
-        with colors("purple"):
+        with colors(THEME['stream_exit_confirm']):
             # it will reach here anytime the player stops executing
             # (eg it has an exp, failure, etc)
             # but ideally it'll only reach here when the user presses
