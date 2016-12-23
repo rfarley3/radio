@@ -23,7 +23,6 @@ from . import (
 from .color import colors
 from .banner import bannerize
 from .album import gen_art
-from .stationfile import get_station_streams
 from .api import Client
 
 # TODO
@@ -323,7 +322,7 @@ def ui_loop(client, station='favs'):
     # otherwise stream num specified, so call player
     stream = c.stream(station, streams[stream_num])
     display_album(stream['art'])
-    display_banner(stream) # TODO port
+    display_banner(stream['name'])
     play_stream(stream) # TODO port
 
 
@@ -331,20 +330,20 @@ def display_album(art_url):
     if art_url is None or art_url == '':
         return
     (term_w, term_h) = term_hw()
-    art = gen_art(art, term_w, term_h)
+    art = gen_art(art_url, term_w, term_h)
     if art is None:
         return
     print("ASCII Printout of Station's Logo:")
     print(art)
 
 
-def display_banner(stream):
+def display_banner(stream_name):
     unhappy = True
     while unhappy:
         (term_w, term_h) = term_hw()
         font = "unknown"
         with colors("yellow"):
-            (banner, font) = bannerize(stream[1], term_w)
+            (banner, font) = bannerize(stream_name, term_w)
             b_IO = StringIO(banner)
             b_height = len(b_IO.readlines())
             if term_h > (b_height + 3):  # Playing, Station Name, Song Title

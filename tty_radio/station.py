@@ -89,7 +89,6 @@ class Station(object):
                         self.reader))
 
     def stream_obj(self, stream):
-        found_st = None
         possibles = [st for st in self._streams if stream == st.name]
         if len(possibles) != 1:
             return None

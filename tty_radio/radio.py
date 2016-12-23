@@ -29,7 +29,6 @@ class Radio(object):
             self.set(station_name)
 
     def station_obj(self, station):
-        found_st = None
         possibles = [st for st in self._stations if station == st.name]
         if len(possibles) != 1:
             return None
@@ -78,14 +77,13 @@ class Radio(object):
             print('Error, stop stream before set')
             return False
         obj = self.station_obj(station_name)
-        if obj is None
+        if obj is None:
             print('Error, no matching station')
             return False
         self._station = obj
         self._stream = None
         if stream_name is None:
             return True
-        streams = self._station.streams
         obj = self._station.stream_obj(stream_name)
         if obj is None:
             print('Error, no matching stream')
