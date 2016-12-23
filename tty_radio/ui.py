@@ -10,6 +10,9 @@ import re
 import math
 from time import sleep
 from io import StringIO
+from subprocess import (
+    check_output,
+    CalledProcessError)
 if PY3:
     get_input = input
 else:
@@ -101,7 +104,12 @@ def term_wh():
     try:
         # TODO os agnostic tty size
         # *nix get terminal/console width
-        rows, columns = os.popen('stty size', 'r').read().split()
+        outp = check_output('stty size', shell=True)
+    except CalledProcessError:
+        return False
+    outp.decode('ascii').strip()
+    try:
+        rows, columns = outp.split()
     except ValueError:
         return (w, h)
     try:
