@@ -5,7 +5,6 @@ if platform.python_version().startswith('3'):
     PY3 = True
 import sys
 import textwrap
-import os
 import re
 import math
 from time import sleep

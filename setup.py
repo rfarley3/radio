@@ -26,4 +26,5 @@ setup(
             'radio_server = tty_radio.__main__:main_serv',
         ]
     },
+    include_package_data=True,
 )
