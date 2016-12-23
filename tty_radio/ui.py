@@ -15,23 +15,21 @@ if PY3:
 else:
     get_input = raw_input
 
-
 from . import (
     VOL,
-    COMPACT_TITLES
-)
+    COMPACT_TITLES)
 from .color import colors
 from .banner import bannerize
 from .album import gen_art
 from .api import Client
 
+
 # TODO
-#   make Station class to hold:
-#     main menu banner
-#     menu "other stations"/station switch items
-#   custom colors for stations/streams
-#   Non-dark terminal (white bg) theme
+#   leverage Radio/Station class to simplify menu "other stations"
+#       aka station switch selections
+#   Provide a non-dark terminal (white bg) theme
 #
+
 
 def stream_list(streams):
     exploded = []
@@ -131,6 +129,7 @@ def del_prompt(num_chars):
 def term_hw():
     (w, h) = (80, 40)
     try:
+        # TODO os agnostic tty size
         # *nix get terminal/console width
         rows, columns = os.popen('stty size', 'r').read().split()
     except ValueError:
@@ -307,11 +306,12 @@ def play_stream(client, stream):
     station_stream = (stream['station'], stream['name'])
     c.play(station_stream)
     # TODO poll for changes that mean we should update UI
+    # TODO reincorporate compact titles
     # TODO poll to detect when stop has happened
     # TODO poll user input to send stop
 
 
-def old_filter():
+def old_filter(stream, parse_name, parse_song):  # noqa
     def pr_blk(buf, prefix='', prefix_len=None, chomp=False, do_pr=True):
         if buf is None or buf == '':
             if not do_pr:

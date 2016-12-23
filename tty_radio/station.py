@@ -11,8 +11,7 @@ from os.path import (
     expanduser,
     join as path_join,
     getmtime as getmtime,
-    isfile as isfile
-)
+    isfile as isfile)
 if PY3:
     from urllib.request import urlopen
 else:

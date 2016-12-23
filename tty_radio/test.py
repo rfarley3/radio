@@ -2,13 +2,13 @@
 from time import sleep, time
 import sys
 from json import loads
+from threading import Thread
 from tty_radio.radio import Radio
 from tty_radio.stream import mpg_running
 from tty_radio.api import Server, Client
-from threading import Thread
 
 
-def test_obj():
+def test_obj():  # noqa
     r = Radio()
     i = 0
     print('%02d>>> r:%s' % (i, r))
@@ -126,7 +126,7 @@ def test_obj():
     sys.exit(0)
 
 
-def test_api_serv():
+def test_api_serv():  # noqa
     r = Radio()
     s = Server(radio=r)
     i = 0
@@ -252,7 +252,7 @@ def test_api_serv():
     sys.exit(0)
 
 
-def test_api_client():
+def test_api_client():  # noqa
     r = Radio()
     s = Server(radio=r)
     st = Thread(target=s.run)

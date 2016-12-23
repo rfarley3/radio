@@ -6,13 +6,18 @@ if platform.python_version().startswith('3'):
 import json
 import requests
 from bottle import run, route, post, request
-
-from . import DEBUG
-from .radio import Radio
 if PY3:
     from urllib.parse import unquote
 else:
     from urllib import unquote
+
+from . import DEBUG
+from .radio import Radio
+
+
+# TODO
+#   Create bootstrap frontend from '/'
+#
 
 
 PORT = 7887

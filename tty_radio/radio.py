@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from .station import (Favs, Soma)
+from .station import Favs, Soma
 
 
 class Radio(object):
