@@ -68,17 +68,17 @@ class Radio(object):
 
     def set(self, station_name, stream_name=None):
         if stream_name is None and station_name == self.station:
-            print('Ignoring, station is same for set')
+            # print('Ignoring, station is same for set')
             return True
         if station_name == self.station and stream_name == self.stream:
-            print('Ignoring, station and stream are same for set')
+            # print('Ignoring, station and stream are same for set')
             return True
         if self.is_playing:
-            print('Error, stop stream before set')
+            # print('Error, stop stream before set')
             return False
         obj = self.station_obj(station_name)
         if obj is None:
-            print('Error, no matching station')
+            # print('Error, no matching station')
             return False
         self._station = obj
         self._stream = None
@@ -86,20 +86,20 @@ class Radio(object):
             return True
         obj = self._station.stream_obj(stream_name)
         if obj is None:
-            print('Error, no matching stream')
+            # print('Error, no matching stream')
             return False
         self._stream = obj
         return True
 
     def play(self, station_stream=None):
         if self.is_playing and not self.is_paused:
-            print('Error, stop/pause stream before play')
+            # print('Error, stop/pause stream before play')
             return (None, None)
         if station_stream is not None:
             station, stream = station_stream
             self.set(station, stream)
         if self.station is None or self.stream is None:
-            print('Error, no station/stream set')
+            # print('Error, no station/stream set')
             return (None, None)
         # if not set, then carp
         self._stream.play()

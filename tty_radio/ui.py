@@ -26,6 +26,7 @@ from .api import Client
 
 
 # TODO
+#   windows detect terminal size
 #   leverage Radio/Station class to simplify menu "other stations"
 #       aka station switch selections
 #
@@ -229,14 +230,14 @@ def ui_loop(client, station='favs'):
     display_banner(stream['name'])
     display_metadata(c, stream)
     c.stop()
-    # TODO poll for changes that mean we should update UI
-    # TODO reincorporate compact titles
-    # TODO poll to detect when stop has happened
     # TODO poll user input to send stop
     return station
 
 
 def display_metadata(client, stream):
+    # to test these updates against another stream
+    #   without conflicting audio:
+    #   mpg123 -f 0 -C -@ <url>
     c = client
     station_name = stream['station']
     stream_name = stream['name']
@@ -274,7 +275,8 @@ def display_metadata(client, stream):
     # keep polling for song title changes
     do_another = True
     while do_another:
-        song_now = c.status()['song']
+        status = c.status()
+        song_now = status['song']
         if song_now != song_name and song_now is not None and song_now != '':
             if COMPACT_TITLES and song_len > 0:
                 del_prompt(song_len)
@@ -283,6 +285,9 @@ def display_metadata(client, stream):
                 song_now, THEME['meta_song_name'],
                 wrap=False)[0]
             song_name = song_now
+        is_playing = status['currently_streaming']
+        if not is_playing:
+            return
         sleep(1)
 
 

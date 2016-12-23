@@ -27,15 +27,12 @@ FONTS = ['3-d', '3x5', '5lineoblique', 'a_zooloo', 'acrobatic', 'alligator', 'al
 
 def rand_font():
     # built-in font fetch doesn't work:
-    # fonts = f.getFonts()
-    # for font in fonts:
-    #    print("font: " + font)
+    #   fonts = f.getFonts()
     # do 100 tries in case font doesn't exist
     # if there are 100 failures, bannerize will fail/barf
     #   on its Figlet constructor
     for i in range(100):
         fi = choice(FONTS)
-        # print(fi)
         try:
             Figlet(font=fi)
             return fi
