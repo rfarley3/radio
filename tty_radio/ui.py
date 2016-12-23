@@ -28,7 +28,6 @@ from .api import Client
 # TODO
 #   leverage Radio/Station class to simplify menu "other stations"
 #       aka station switch selections
-#   Provide a non-dark terminal (white bg) theme
 #
 
 
