@@ -147,7 +147,7 @@ class Client(object):
         rjson = self.get('status')
         if not rjson['success']:
             print('API request failure: %s' % rjson)
-            return {}
+            return None
         return rjson['resp']
 
     def stations(self):

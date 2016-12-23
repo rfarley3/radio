@@ -42,7 +42,11 @@ class Radio(object):
     def song(self):
         if self._stream is None:
             return None
-        return self._stream.meta_song
+        song = self._stream.meta_song
+        if song is None:
+            # consider returning 'No Title in Metadata'
+            return self._stream.meta_name
+        return song
 
     @property
     def is_playing(self):

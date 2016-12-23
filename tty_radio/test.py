@@ -4,7 +4,8 @@ import sys
 from json import loads
 from tty_radio.radio import Radio
 from tty_radio.stream import mpg_running
-from tty_radio.api import Server
+from tty_radio.api import Server, Client
+from threading import Thread
 
 
 def test_obj():
@@ -251,7 +252,113 @@ def test_api_serv():
     sys.exit(0)
 
 
+def test_api_client():
+    r = Radio()
+    s = Server(radio=r)
+    st = Thread(target=s.run)
+    st.daemon = True
+    st.start()
+    sleep(1)
+    c = Client()
+    i = 0
+    r = c.status()
+    print('%02d>>> c.status:%s' % (i, r))
+    i += 1
+    if r is None:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = c.stations()
+    print('%02d>>> c.stations:%s' % (i, r))
+    i += 1
+    if len(r) == 0:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = c.streams()
+    # print('%02d>>> c.streams:%s' % (i, r))
+    i += 1
+    if len(r) == 0:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = c.streams('favs')
+    # print('%02d>>> c.streams(favs):%s' % (i, r))
+    i += 1
+    if len(r) == 0:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = c.streams('ewqrewrwer')
+    print('%02d>>> c.streams(ewqrewrwer):%s' % (i, r))
+    i += 1
+    if len(r) != 0:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    # Set currently requires both when called from client API
+    # r = c.set('favs')
+    # print('%02d>>> c.set(favs):%s' % (i, r))
+    # i += 1
+    # if not r:
+    #     print('%02d>>> Failed' % i)
+    #     sys.exit(1)
+    # r = c.set('ewqrewrwer')
+    # print('%02d>>> c.set(ewqrewrwer):%s' % (i, r))
+    # i += 1
+    # if r:
+    #     print('%02d>>> Failed' % i)
+    #     sys.exit(1)
+    r = c.set('favs', 'ewqrewrwer')
+    print('%02d>>> c.set(favs,ewqrewrwer):%s' % (i, r))
+    i += 1
+    if r:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = c.set('favs', 'BAGeL Radio')
+    print('%02d>>> c.set(favs,BAGeL Radio):%s' % (i, r))
+    i += 1
+    if not r:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = c.play()
+    print('%02d>>> c.play:%s' % (i, r))
+    i += 1
+    if not r:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    sleep(10)
+    r = c.pause()
+    print('%02d>>> c.pause:%s' % (i, r))
+    i += 1
+    if not r:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = c.stop()
+    print('%02d>>> c.stop:%s' % (i, r))
+    i += 1
+    if not r:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    sleep(2)
+    r = c.play(('favs', 'WCPE Classical'))
+    print('%02d>>> c.play((favs,WCPE Classical)):%s' % (i, r))
+    i += 1
+    if not r:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    sleep(10)
+    r = c.status()
+    print('%02d>>> c.status:%s' % (i, r))
+    i += 1
+    if r is None:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    r = c.stop()
+    print('%02d>>> c.stations(station):%s' % (i, r))
+    i += 1
+    if not r:
+        print('%02d>>> Failed' % i)
+        sys.exit(1)
+    sys.exit(0)
+
+
 if __name__ == "__main__":
     # test_obj()
-    test_api_serv()
-    # test_api_client()
+    # test_api_serv()
+    test_api_client()

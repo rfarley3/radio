@@ -81,8 +81,6 @@ class Stream(object):
                 len(inp) > 10 and
                 inp[0:8] == "ICY-NAME"):
             self.meta_name = parse_name(inp[10:])
-            if self.meta_song is None:
-                self.meta_song = self.meta_name
         if len(inp) > 10 and inp[0:8] == "ICY-META":
             song = parse_song(inp[10:])
             if song is not None and len(song) == 0:
