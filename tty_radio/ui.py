@@ -219,14 +219,18 @@ def ui_loop(client, station='favs'):
         return station
     # ######
     # otherwise stream num specified, so call player
+    ##
+    # get the stream name only
     to_stream = streams[stream_num]
-    # print(station, to_stream['name'])
+    # convert the name only into more details
     stream = c.stream(station, to_stream['name'])
     if stream is None:
         print('Error, could not get stream details')
         return station
     display_album(stream['art'])
     display_banner(stream['name'])
+#     display_metadata()
+# def display_metadata():
     station_stream = (stream['station'], stream['name'])
     c.play(station_stream)
     i = 0
@@ -239,7 +243,27 @@ def ui_loop(client, station='favs'):
     if disp_name is None:
         disp_name = stream['name']
     print_blockify('>>> ', 'blue', disp_name, 'blue')
-    sleep(10)
+    # wait for initial song
+    i = 0
+    song_len = 0
+    song_name = stream['meta_song']
+    while i < 10 and song_name is None:
+        stream = c.stream(station, to_stream['name'])
+        song_name = stream['meta_song']
+        sleep(1)
+        i += 1
+    if song_name is not None and song_name != '':
+        song_len = print_blockify('>>> ', 'blue', song_name, 'blue', wrap=False)[0]
+    # keep polling for title changes
+    do_another = True
+    while do_another:
+        song_now = c.status()['song']
+        if song_now != song_name and song_now is not None and song_now != '':
+            if COMPACT_TITLES and song_len > 0:
+                del_prompt(song_len)
+            song_len = print_blockify('>>> ', 'blue', song_now, 'blue', wrap=False)[0]
+            song_name = song_now
+        sleep(1)
     c.stop()
     # TODO poll for changes that mean we should update UI
     # TODO reincorporate compact titles
