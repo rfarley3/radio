@@ -58,6 +58,19 @@ class Server(object):
         route('/api/v1/play')(self.play)
         route('/api/v1/pause')(self.pause)
         route('/api/v1/stop')(self.stop)
+
+        route('/api/v1.1/stations')(self.stations)  # incl streams w/ station data
+        route('/api/v1.1/stations/<station>')(self.station) # incl streams w/ station data
+        route('/api/v1.1/stations/<station>/streams')(self.streams)
+        route('/api/v1.1/stations/<station>/streams/<stream>')(self.stream)
+        route('/api/v1.1/streams')(self.streams)
+        route('/api/v1.1/streams/<station>')(self.streams)
+        route('/api/v1.1/streams/<station>/<stream>')(self.stream)
+        route('/api/v1.1/player')(self.status)
+        post('/api/v1.1/player')(self.play)
+        post('/api/v1.1/player/<station>/<stream>')(self.play)
+        put('/api/v1.1/player')(self.pause)
+        delete('/api/v1.1/player')(self.stop)
         run(host=self.host, port=self.port, debug=BOTTLE_DEBUG, quiet=True)
 
     # TODO load a js frontend
@@ -173,13 +186,29 @@ class Server(object):
         resp = 'Setting active stream to %s %s' % (station, stream)
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
-    def play(self):
+    def play(self, station=None, stream=None):
+        # Any conditions when auto-stop make sense?
+        if self.radio.is_playing and not self.radio.is_paused:
+            success = False
+            resp = 'Failure: stop/pause before playing'
+            return json.dumps({'success': success, 'resp': resp}) + '\n'
+        if station is not None:
+            station = unquote(station)
+        if stream is not None:
+            stream = unquote(stream)
+        if (station is not None and stream is not None and
+                (self.radio.station != station or
+                 self.radio.stream != stream)):
+            if not self.radio.set(station, stream):
+                success = False
+                resp = 'Failure: could not set the station/stream'
+                return json.dumps({'success': success, 'resp': resp}) + '\n'
         (station, stream) = self.radio.play()
         success = True
         resp = 'Playing %s %s' % (station, stream)
         if station is None or stream is None:
             success = False
-            resp = 'Failure: set first, or stop any currently playing'
+            resp = 'Failure: could not play'
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
     def pause(self):
