@@ -42,7 +42,14 @@ class Radio(object):
 
     @property
     def stations(self):
-        return [st.name for st in self._stations]
+        # return [st.name for st in self._stations]
+        stations = []
+        for st in self._stations:
+            streams = []
+            for stm in st.streams:
+                streams.append(stm.name)
+            stations.append({'name': st.name, 'ui_name': st.ui_name, 'streams': streams})
+        return stations
 
     @property
     def song(self):

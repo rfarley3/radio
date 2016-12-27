@@ -51,7 +51,7 @@ function doAjax(uri, method, data) {
             </div>
             <div class="jumbotron">
                 <h3><div id="stations-list"></div></h3>
-                <h3><div id="stations-list-test"></div></h3>
+                <!-- <h3><div id="stations-list-test"></div></h3> -->
             </div>
         </div>
         <script type="text/javascript">
@@ -85,25 +85,34 @@ function getStations() {
             return;
         }
         // console.log("Query response obj: " + JSON.stringify(data.resp));
-        var stations = "<ul>";
+        var stations = "<ul class=\"list-group\">";
         data.resp.stations.forEach(function(station) {
             // console.log('station: ' + station)
-            stations += "<li>" + station + "</li>"
+            stations += "<li class=\"list-group-item\">" + station.ui_name + "<span class=\"badge\">" + station.streams.length + "</span>";
+            if (station.streams.length > 0) {
+                stations += "<ol>";
+                station.streams.forEach(function(stream) {
+                    stations += "<li>" + stream + "</li>";
+                });
+                stations += "</ol>";
+            }
+            stations += "</li>";
         });
         stations += "</ul>"
         $('#stations-list').html(stations);
-        var randomnumber = Math.floor(Math.random() * 100);
-        $('#stations-list-test').text(randomnumber);
+        // var randomnumber = Math.floor(Math.random() * 100);
+        // $('#stations-list-test').text(randomnumber);
     });
-}
+};  // end getStations
 
-$(document).ready(
-    function() {
-        getStatus();
-        getStations();
-        // setInterval(getStatus(), 1000);
-    }
-);
+// $(document).ready
+$(function() {
+    // setInterval(function() {
+    //     getStatus();
+    // }, 1000);
+    getStatus();
+    getStations();
+});
 
 // post('/api/v1.1/player/<station>/<stream>')(self.play)
 // put('/api/v1.1/player')(self.pause)
