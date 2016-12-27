@@ -3,15 +3,16 @@ from setuptools import setup
 setup(
     name='tty_radio',
     packages=['tty_radio'],
-    version='1.0.0',
+    version='1.1.0',
     description=(
         "Linux/OS X RESTful player for online radio streams, " +
         "like SomaFM and WCPE. Comes with a terminal UI " +
-        "flavored with colors and ASCII art."),
+        "flavored with colors and ASCII art " +
+        "and web UI for remote management."),
     author='Ryan Farley',
     author_email='rfarley3@gmu.edu',
     url='https://github.com/rfarley3/radio',
-    download_url='https://github.com/rfarley3/radio/tarball/1.0.0',
+    download_url='https://github.com/rfarley3/radio/tarball/1.1.0',
     keywords=['radio', 'somafm', 'streaming', 'mpg123'],
     classifiers=[],
     install_requires=[
