@@ -48,7 +48,10 @@ class Radio(object):
             streams = []
             for stm in st.streams:
                 streams.append(stm.name)
-            stations.append({'name': st.name, 'ui_name': st.ui_name, 'streams': streams})
+            stations.append({
+                'name': st.name,
+                'ui_name': st.ui_name,
+                'streams': streams})
         return stations
 
     @property

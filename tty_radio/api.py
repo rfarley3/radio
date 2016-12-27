@@ -9,7 +9,7 @@ import os
 from bottle import (
     run,
     route, post, put, delete,
-    request, # response, hook
+    request,  # response, hook
 )
 if PY3:
     from urllib.parse import unquote
@@ -18,11 +18,8 @@ else:
 
 from .radio import Radio
 
-# TODO
-#   Create bootstrap frontend from '/'
-#
 
-BOTTLE_DEBUG = True
+BOTTLE_DEBUG = False
 PORT = 7887
 
 
@@ -85,13 +82,15 @@ class Server(object):
         post('/api/v1.1/player/<station>/<stream>')(self.play)
         put('/api/v1.1/player')(self.pause)
         delete('/api/v1.1/player')(self.stop)
-        run(host=self.host, port=self.port, debug=BOTTLE_DEBUG, quiet=not BOTTLE_DEBUG)
+        run(host=self.host, port=self.port,
+            debug=BOTTLE_DEBUG, quiet=not BOTTLE_DEBUG)
 
     # def enable_cors(self):
     #     '''Add headers to enable CORS'''
     #     _allow_origin = '*'
     #     _allow_methods = 'PUT, GET, POST, DELETE, OPTIONS'
-    #     _allow_headers = 'Authorization, Origin, Accept, Content-Type, X-Requested-With'
+    #     _allow_headers = ('Authorization, Origin, Accept, ' +
+    #                       'Content-Type, X-Requested-With'
     #     response.headers['Access-Control-Allow-Origin'] = _allow_origin
     #     response.headers['Access-Control-Allow-Methods'] = _allow_methods
     #     response.headers['Access-Control-Allow-Headers'] = _allow_headers
@@ -262,6 +261,7 @@ class Server(object):
 class Client(object):
     """Importable Python object to wrap REST calls"""
     version = 'v1.1'
+
     def __init__(self, addr=None):
         self.host = '127.0.0.1'
         self.port = PORT
