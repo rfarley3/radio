@@ -5,11 +5,13 @@ if platform.python_version().startswith('3'):
     PY3 = True
 import sys
 import textwrap
-import os
 import re
 import math
 from time import sleep
 from io import StringIO
+from subprocess import (
+    check_output,
+    CalledProcessError)
 if PY3:
     get_input = input
 else:
@@ -101,7 +103,12 @@ def term_wh():
     try:
         # TODO os agnostic tty size
         # *nix get terminal/console width
-        rows, columns = os.popen('stty size', 'r').read().split()
+        outp = check_output('stty size', shell=True)
+    except CalledProcessError:
+        return False
+    outp.decode('ascii').strip()
+    try:
+        rows, columns = outp.split()
     except ValueError:
         return (w, h)
     try:
@@ -301,7 +308,7 @@ def display_metadata(client, stream):
         i += 1
     if disp_name is None:
         disp_name = stream_name
-    if disp_name is not None and disp_name != '':
+    if disp_name is not None and disp_name.strip() != '':
         showed_name = True
         if COMPACT_TITLES:
             print("\033[A" * 2, end='')
@@ -321,7 +328,9 @@ def display_metadata(client, stream):
         song_name = stream['meta_song']
         sleep(0.5)
         i += 1
-    if song_name is not None and song_name != '':
+    showed_song = False
+    if song_name is not None and song_name.strip() != '':
+        showed_song = True
         if COMPACT_TITLES:
             print("\033[A", end='')
             if not showed_name:
@@ -337,9 +346,16 @@ def display_metadata(client, stream):
     while do_another:
         status = c.status()
         song_now = status['song']
-        if song_now != song_name and song_now is not None and song_now != '':
-            if COMPACT_TITLES and song_len > 0:
-                del_prompt(song_len)
+        if (song_now != song_name and
+                song_now is not None and song_now.strip() != ''):
+            if COMPACT_TITLES:
+                if not showed_name:
+                    print("\033[A", end='')
+                if not showed_song:
+                    print("\033[A", end='')
+                showed_song = True
+                if song_len > 0:
+                    del_prompt(song_len)
             song_len = print_blockify(
                 THEME['meta_prefix_str'], THEME['meta_prefix'],
                 song_now, THEME['meta_song_name'],

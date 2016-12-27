@@ -42,7 +42,17 @@ class Radio(object):
 
     @property
     def stations(self):
-        return [st.name for st in self._stations]
+        # return [st.name for st in self._stations]
+        stations = []
+        for st in self._stations:
+            streams = []
+            for stm in st.streams:
+                streams.append(stm.name)
+            stations.append({
+                'name': st.name,
+                'ui_name': st.ui_name,
+                'streams': streams})
+        return stations
 
     @property
     def song(self):
@@ -50,8 +60,8 @@ class Radio(object):
             return None
         song = self._stream.meta_song
         if song is None:
-            # consider returning 'No Title in Metadata'
-            return self._stream.meta_name
+            return 'No Title in Metadata'
+            # return self._stream.meta_name
         return song
 
     @property

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Radio</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+        <style type="text/css">
+.cleanlink:a {
+    text-decoration: none;
+}
+.cleanlink:link, .cleanlink:visited {
+    text-decoration:none;
+    color:#777
+}
+.cleanlink:hover {
+    text-decoration:none;
+}
+    </style>
+
+        <script type="text/javascript">
+var uri = 'http://localhost:7887/api/v1.1/';
+var uri_player = uri + 'player';
+var uri_stations = uri + 'stations';
+function doAjax(uri, method, data) {
+    var request = {
+        url: uri,
+        type: method,
+        contentType: "application/json",
+        accepts: "application/json",
+        cache: false,
+        dataType: 'json',
+        data: JSON.stringify(data),
+        error: function(jqXHR) {
+            console.log("ajax error " + jqXHR.status);
+        }
+    };
+    return $.ajax(request);
+}
+        </script>
+    </head>
+
+    <body>
+        <div class="container">
+            <nav class="navbar navbar-default">
+                <div class="navbar-header pull-right">
+                    <a class="navbar-brand text-muted" href="#">Radio API Client</a>
+                </div>
+            </nav>
+            <div class="jumbotron">
+                <div id="status">
+                    <h3><div id="status-currently-streaming"></div></h3>
+                    <h3><div id="status-stream"></div></h3>
+                    <h3><div id="status-song"></div></h3>
+                </div>
+                <div id="ctrl" class="hidden">
+                    <button id="play-btn" type="button" class="btn btn-primary" onclick="resume()">Play</button>
+                    <button id="pause-btn" type="button" class="btn btn-primary" onclick="pause()">Pause</button>
+                    <button id="stop-btn" type="button" class="btn btn-primary" onclick="stop()">Stop</button>
+                </div>
+            </div>
+            <div class="jumbotron">
+                <h3><div class="panel-group" id="stations-list"></div></h3>
+            </div>
+        </div>
+        <script type="text/javascript">
+// get('/api/v1.1/player')(self.status)
+function getStatus() {
+    doAjax(uri_player, 'GET').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        // console.log("Query response obj: " + JSON.stringify(data.resp));
+        if (!data.resp.currently_streaming) {
+            console.log("Not currently streaming");
+            $('#status-currently-streaming').text("Player not active, click a stream below");
+            $('#status-stream').text('');
+            $('#status-song').text('');
+            $('#ctrl').addClass('hidden');
+        }
+        else {
+            // console.log("Currently streaming: resp " + data.resp.station + " " + data.resp.stream);
+            $('#status-currently-streaming').text('');
+            $('#status-stream').text(data.resp.stream);
+            $('#status-song').text(data.resp.song);
+            $('#ctrl').removeClass('hidden');
+        }
+    });
+};  // end getStatus
+
+
+// get('/api/v1.1/stations')(self.stations)
+function getStations() {
+    doAjax(uri_stations, 'GET').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        // console.log("Query response obj: " + JSON.stringify(data.resp));
+        var station_idx = 0;
+        var stations = "";
+        data.resp.stations.forEach(function(station) {
+            collapse_id = "collapse" + station_idx;
+            stations += "<div class=\"panel panel-default\"><div class=\"panel-heading><h4 class=\"panel-title\"><a class=\"text-muted cleanlink\" data-toggle=\"collapse\" data-parent=\"#stations-list\" href=\"#" + collapse_id + "\">" + station.ui_name + "<span class=\"badge pull-right\">" + station.streams.length + "</span></a></h4></div>";
+            stations += "<div id=\"" + collapse_id + "\" class=\"panel-collapse collapse\"><div class=\"panel-body\">";
+            if (station.streams.length > 0) {
+                stations += "<ol class=\"list-group\">";
+                station.streams.forEach(function(stream) {
+                    stations += "<li class=\"list-group-item\" onclick=\"stop();play('" + station.name + "','" + stream + "')\">" + stream + "</li>";
+                });
+                stations += "</ol>";
+            }
+            stations += "</div></div></div>";
+            station_idx++;
+        });
+        $('#stations-list').html(stations);
+    });
+};  // end getStations
+
+
+// post('/api/v1.1/player/<station>/<stream>')(self.play)
+function play(station, stream) {
+    uri_play = uri_player + "/" + station + "/" + stream
+    doAjax(uri_play, 'POST').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        console.log("Query response obj: " + JSON.stringify(data.resp));
+    });
+    $('#play-btn').addClass('hidden');
+    $('#pause-btn').removeClass('hidden');
+    $('#stop-btn').removeClass('hidden');
+};  // end play
+
+
+// delete('/api/v1.1/player')(self.stop)
+function stop() {
+    doAjax(uri_player, 'DELETE').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        console.log("Query response obj: " + JSON.stringify(data.resp));
+    });
+    $('#play-btn').removeClass('hidden');
+    $('#pause-btn').addClass('hidden');
+    $('#stop-btn').addClass('hidden');
+};  // end stop
+
+
+// put('/api/v1.1/player')(self.pause)
+function pause() {
+    doAjax(uri_player, 'PUT').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        console.log("Query response obj: " + JSON.stringify(data.resp));
+    });
+    $('#play-btn').removeClass('hidden');
+    $('#pause-btn').addClass('hidden');
+    $('#stop-btn').removeClass('hidden');
+};  // end pause
+
+
+// post('/api/v1.1/player')(self.play)
+function resume() {
+    doAjax(uri_player, 'POST').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        console.log("Query response obj: " + JSON.stringify(data.resp));
+    });
+    $('#play-btn').addClass('hidden');
+    $('#pause-btn').removeClass('hidden');
+    $('#stop-btn').removeClass('hidden');
+};  // end resume
+
+
+// $(document).ready
+$(function() {
+    setInterval(function() {
+        getStatus();
+    }, 1000);
+    getStations();
+});
+        </script>
+    </body>
+</html>
