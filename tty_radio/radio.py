@@ -91,12 +91,11 @@ class Radio(object):
         self._stream = obj
         return True
 
-    def play(self, station_stream=None):
+    def play(self, station=None, stream=None):
         if self.is_playing and not self.is_paused:
             # print('Error, stop/pause stream before play')
             return (None, None)
-        if station_stream is not None:
-            station, stream = station_stream
+        if station is not None and stream is not None:
             self.set(station, stream)
         if self.station is None or self.stream is None:
             # print('Error, no station/stream set')
