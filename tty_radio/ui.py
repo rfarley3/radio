@@ -282,12 +282,11 @@ def display_metadata(client, stream):
     c = client
     station_name = stream['station']
     stream_name = stream['name']
-    station_stream = (station_name, stream_name)
     if COMPACT_TITLES:
         print()
         print()
     # don't assume that it's not playing from another client
-    if not c.play(station_stream):
+    if not c.play(station_name, stream_name):
         print('Error, already playing %s' % c.status())
         # TODO ignore if playing what was requested
         return False

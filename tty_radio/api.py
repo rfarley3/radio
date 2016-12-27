@@ -324,10 +324,9 @@ class Client(object):
             return []
         return rjson['resp']['streams']
 
-    def play(self, station_stream=None):
+    def play(self, station=None, stream=None):
         url = 'player'
-        if station_stream is not None:
-            station, stream = station_stream
+        if station is not None and stream is not None:
             url = 'player/%s/%s' % (station, stream)
         rjson = self.post(url)
         if rjson is None or not rjson['success']:

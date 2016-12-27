@@ -293,13 +293,13 @@ def test_api_client():  # noqa
         print('%02d>>> Failed' % i)
         sys.exit(1)
     print('%02d>>> c.play(favs,ewqrewrwer)' % i)
-    r = c.play(('favs', 'ewqrewrwer'))
+    r = c.play('favs', 'ewqrewrwer')
     # print('%02d>>> c.play(favs,ewqrewrwer):%s' % (i, r))
     i += 1
     if r:
         print('%02d>>> Failed' % i)
         sys.exit(1)
-    r = c.play(('favs', 'BAGeL Radio'))
+    r = c.play('favs', 'BAGeL Radio')
     print('%02d>>> c.play(favs,BAGeL Radio):%s' % (i, r))
     i += 1
     if not r:
@@ -319,8 +319,8 @@ def test_api_client():  # noqa
         print('%02d>>> Failed' % i)
         sys.exit(1)
     sleep(2)
-    r = c.play(('favs', 'WCPE Classical'))
-    print('%02d>>> c.play((favs,WCPE Classical)):%s' % (i, r))
+    r = c.play('favs', 'WCPE Classical')
+    print('%02d>>> c.play(favs,WCPE Classical):%s' % (i, r))
     i += 1
     if not r:
         print('%02d>>> Failed' % i)
