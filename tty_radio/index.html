@@ -14,6 +14,19 @@
         <!-- Latest compiled and minified JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
+        <style type="text/css">
+.cleanlink:a {
+    text-decoration: none;
+}
+.cleanlink:link, .cleanlink:visited {
+    text-decoration:none;
+    color:#777
+}
+.cleanlink:hover {
+    text-decoration:none;
+}
+    </style>
+
         <script type="text/javascript">
 var uri = 'http://localhost:7887/api/v1.1/';
 var uri_player = uri + 'player';
@@ -46,14 +59,13 @@ function doAjax(uri, method, data) {
             <div class="jumbotron">
                 <div id="status">
                     <h3><div id="status-currently-streaming"></div></h3>
-                    <!-- <h3><div id="status-station"></div></h3> -->
                     <h3><div id="status-stream"></div></h3>
                     <h3><div id="status-song"></div></h3>
                 </div>
                 <div id="ctrl" class="hidden">
-                    <button type="button" class="btn btn-primary" onclick="resume()">Play</button>
-                    <button type="button" class="btn btn-primary" onclick="pause()">Pause</button>
-                    <button type="button" class="btn btn-primary" onclick="stop()">Stop</button>
+                    <button id="play-btn" type="button" class="btn btn-primary" onclick="resume()">Play</button>
+                    <button id="pause-btn" type="button" class="btn btn-primary" onclick="pause()">Pause</button>
+                    <button id="stop-btn" type="button" class="btn btn-primary" onclick="stop()">Stop</button>
                 </div>
             </div>
             <div class="jumbotron">
@@ -72,7 +84,6 @@ function getStatus() {
         if (!data.resp.currently_streaming) {
             console.log("Not currently streaming");
             $('#status-currently-streaming').text("Player not active, click a stream below");
-            // $('#status-station').text('');
             $('#status-stream').text('');
             $('#status-song').text('');
             $('#ctrl').addClass('hidden');
@@ -80,7 +91,6 @@ function getStatus() {
         else {
             // console.log("Currently streaming: resp " + data.resp.station + " " + data.resp.stream);
             $('#status-currently-streaming').text('');
-            // $('#status-station').text(data.resp.station);
             $('#status-stream').text(data.resp.stream);
             $('#status-song').text(data.resp.song);
             $('#ctrl').removeClass('hidden');
@@ -101,12 +111,12 @@ function getStations() {
         var stations = "";
         data.resp.stations.forEach(function(station) {
             collapse_id = "collapse" + station_idx;
-            stations += "<div class=\"panel panel-default\"><div class=\"panel-heading><h4 class=\"panel-title\"><a class=\"nav\" data-toggle=\"collapse\" data-parent=\"#stations-list\" href=\"#" + collapse_id + "\">" + station.ui_name + "<span class=\"badge pull-right\">" + station.streams.length + "</span></a></h4></div>";
+            stations += "<div class=\"panel panel-default\"><div class=\"panel-heading><h4 class=\"panel-title\"><a class=\"text-muted cleanlink\" data-toggle=\"collapse\" data-parent=\"#stations-list\" href=\"#" + collapse_id + "\">" + station.ui_name + "<span class=\"badge pull-right\">" + station.streams.length + "</span></a></h4></div>";
             stations += "<div id=\"" + collapse_id + "\" class=\"panel-collapse collapse\"><div class=\"panel-body\">";
             if (station.streams.length > 0) {
                 stations += "<ol class=\"list-group\">";
                 station.streams.forEach(function(stream) {
-                    stations += "<li class=\"list-group-item\" onclick=\"play('" + station.name + "','" + stream + "')\">" + stream + "</li>";
+                    stations += "<li class=\"list-group-item\" onclick=\"stop();play('" + station.name + "','" + stream + "')\">" + stream + "</li>";
                 });
                 stations += "</ol>";
             }
@@ -128,6 +138,9 @@ function play(station, stream) {
         }
         console.log("Query response obj: " + JSON.stringify(data.resp));
     });
+    $('#play-btn').addClass('hidden');
+    $('#pause-btn').removeClass('hidden');
+    $('#stop-btn').removeClass('hidden');
 };  // end play
 
 
@@ -140,6 +153,9 @@ function stop() {
         }
         console.log("Query response obj: " + JSON.stringify(data.resp));
     });
+    $('#play-btn').removeClass('hidden');
+    $('#pause-btn').addClass('hidden');
+    $('#stop-btn').addClass('hidden');
 };  // end stop
 
 
@@ -152,6 +168,9 @@ function pause() {
         }
         console.log("Query response obj: " + JSON.stringify(data.resp));
     });
+    $('#play-btn').removeClass('hidden');
+    $('#pause-btn').addClass('hidden');
+    $('#stop-btn').removeClass('hidden');
 };  // end pause
 
 
@@ -164,6 +183,9 @@ function resume() {
         }
         console.log("Query response obj: " + JSON.stringify(data.resp));
     });
+    $('#play-btn').addClass('hidden');
+    $('#pause-btn').removeClass('hidden');
+    $('#stop-btn').removeClass('hidden');
 };  // end resume
 
 
@@ -172,7 +194,6 @@ $(function() {
     setInterval(function() {
         getStatus();
     }, 1000);
-    // getStatus();
     getStations();
 });
         </script>
