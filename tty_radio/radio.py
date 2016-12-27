@@ -60,8 +60,8 @@ class Radio(object):
             return None
         song = self._stream.meta_song
         if song is None:
-            # consider returning 'No Title in Metadata'
-            return self._stream.meta_name
+            return 'No Title in Metadata'
+            # return self._stream.meta_name
         return song
 
     @property

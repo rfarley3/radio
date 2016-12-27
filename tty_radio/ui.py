@@ -308,7 +308,7 @@ def display_metadata(client, stream):
         i += 1
     if disp_name is None:
         disp_name = stream_name
-    if disp_name is not None and disp_name != '':
+    if disp_name is not None and disp_name.strip() != '':
         showed_name = True
         if COMPACT_TITLES:
             print("\033[A" * 2, end='')
@@ -328,7 +328,9 @@ def display_metadata(client, stream):
         song_name = stream['meta_song']
         sleep(0.5)
         i += 1
-    if song_name is not None and song_name != '':
+    showed_song = False
+    if song_name is not None and song_name.strip() != '':
+        showed_song = True
         if COMPACT_TITLES:
             print("\033[A", end='')
             if not showed_name:
@@ -344,7 +346,13 @@ def display_metadata(client, stream):
     while do_another:
         status = c.status()
         song_now = status['song']
-        if song_now != song_name and song_now is not None and song_now != '':
+        if (song_now != song_name and
+                song_now is not None and song_now.strip() != ''):
+            if not showed_song and COMPACT_TITLES:
+                print("\033[A", end='')
+                if not showed_name:
+                    print("\033[A", end='')
+                showed_song = True
             if COMPACT_TITLES and song_len > 0:
                 del_prompt(song_len)
             song_len = print_blockify(
