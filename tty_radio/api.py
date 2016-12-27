@@ -22,7 +22,7 @@ from .radio import Radio
 #   Create bootstrap frontend from '/'
 #
 
-BOTTLE_DEBUG = True
+BOTTLE_DEBUG = False
 PORT = 7887
 
 
@@ -50,11 +50,14 @@ class Server(object):
             self.radio = Radio()
 
     def run(self):
+        # UI Functions
         route('/')(self.frontend)
         # route('/', method='OPTIONS')(self.options_handler)
         # route('/<path:path>', method='OPTIONS')(self.options_handler)
         # hook('after_request')(self.enable_cors)
 
+        # API functions
+        # v1
         route('/api/v1/')(self.index)
         route('/api/v1/status')(self.status)
         route('/api/v1/stations')(self.stations)
@@ -68,8 +71,10 @@ class Server(object):
         route('/api/v1/pause')(self.pause)
         route('/api/v1/stop')(self.stop)
 
-        route('/api/v1.1/stations')(self.stations)  # incl streams w/ station data
-        route('/api/v1.1/stations/<station>')(self.station) # incl streams w/ station data
+        # API functions
+        # v1.1
+        route('/api/v1.1/stations')(self.stations)
+        route('/api/v1.1/stations/<station>')(self.station)
         route('/api/v1.1/stations/<station>/streams')(self.streams)
         route('/api/v1.1/stations/<station>/streams/<stream>')(self.stream)
         route('/api/v1.1/streams')(self.streams)
@@ -117,6 +122,7 @@ class Server(object):
         }
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
+    # TODO incl streams w/ station data
     def station(self, station):
         station = unquote(station)
         success = False
@@ -182,6 +188,7 @@ class Server(object):
         }
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
+    # TODO incl streams w/ station data
     def stations(self):
         success = True
         resp = {
