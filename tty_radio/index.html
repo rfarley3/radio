@@ -51,7 +51,6 @@ function doAjax(uri, method, data) {
             </div>
             <div class="jumbotron">
                 <h3><div class="panel-group" id="stations-list"></div></h3>
-                <!-- <h3><div id="stations-list-test"></div></h3> -->
             </div>
         </div>
         <script type="text/javascript">
@@ -62,13 +61,13 @@ function getStatus() {
             console.log("request failure, response: " + JSON.stringify(data.resp));
             return;
         }
-        console.log("Query response obj: " + JSON.stringify(data.resp));
+        // console.log("Query response obj: " + JSON.stringify(data.resp));
         if (!data.resp.currently_streaming) {
             console.log("Not currently streaming");
             $('#status-currently-streaming').text("Player is not currently streaming");
         }
         else {
-            console.log("Currently streaming: resp " + data.resp.station + " " + data.resp.stream);
+            // console.log("Currently streaming: resp " + data.resp.station + " " + data.resp.stream);
             $('#status-currently-streaming').text('Player is streaming');
             $('#status-station').text(data.resp.station);
             $('#status-stream').text(data.resp.stream);
@@ -76,6 +75,7 @@ function getStatus() {
         }
     });
 };  // end getStatus
+
 
 // get('/api/v1.1/stations')(self.stations)
 function getStations() {
@@ -87,16 +87,14 @@ function getStations() {
         // console.log("Query response obj: " + JSON.stringify(data.resp));
         var station_idx = 0;
         var stations = "";
-        //style=\"vertical-align: middle
         data.resp.stations.forEach(function(station) {
-            // console.log('station: ' + station)
             collapse_id = "collapse" + station_idx;
             stations += "<div class=\"panel panel-default\"><div class=\"panel-heading><h4 class=\"panel-title\"><a class=\"nav\" data-toggle=\"collapse\" data-parent=\"#stations-list\" href=\"#" + collapse_id + "\">" + station.ui_name + "<span class=\"badge pull-right\">" + station.streams.length + "</span></a></h4></div>";
             stations += "<div id=\"" + collapse_id + "\" class=\"panel-collapse collapse\"><div class=\"panel-body\">";
             if (station.streams.length > 0) {
                 stations += "<ol class=\"list-group\">";
                 station.streams.forEach(function(stream) {
-                    stations += "<li class=\"list-group-item\">" + stream + "</li>";
+                    stations += "<li class=\"list-group-item\" onclick=\"play('" + station.name + "','" + stream + "')\">" + stream + "</li>";
                 });
                 stations += "</ol>";
             }
@@ -104,10 +102,25 @@ function getStations() {
             station_idx++;
         });
         $('#stations-list').html(stations);
-        // var randomnumber = Math.floor(Math.random() * 100);
-        // $('#stations-list-test').text(randomnumber);
     });
 };  // end getStations
+
+
+// post('/api/v1.1/player/<station>/<stream>')(self.play)
+function play(station, stream) {
+    uri_play = uri_player + "/" + station + "/" + stream
+    doAjax(uri_play, 'POST').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        console.log("Query response obj: " + JSON.stringify(data.resp));
+    });
+};  // end play
+
+// put('/api/v1.1/player')(self.pause)
+// post('/api/v1.1/player')(self.play)
+// delete('/api/v1.1/player')(self.stop)
 
 // $(document).ready
 $(function() {
@@ -117,11 +130,6 @@ $(function() {
     getStatus();
     getStations();
 });
-
-// post('/api/v1.1/player/<station>/<stream>')(self.play)
-// put('/api/v1.1/player')(self.pause)
-// post('/api/v1.1/player')(self.play)
-// delete('/api/v1.1/player')(self.stop)
         </script>
     </body>
 </html>
