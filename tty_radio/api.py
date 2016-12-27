@@ -22,7 +22,7 @@ from .radio import Radio
 #   Create bootstrap frontend from '/'
 #
 
-BOTTLE_DEBUG = False
+BOTTLE_DEBUG = True
 PORT = 7887
 
 
