@@ -7,7 +7,6 @@ This package wraps your favorite terminal based audio stream player (like mpg123
 On the road map:
 * Plugin architecture to easily add station specific scrapers
 * Web UI via bootstrap for non-console and remote management
-* Color themes for terminal UI
 
 ## Install
 
