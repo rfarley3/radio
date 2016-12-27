@@ -348,13 +348,14 @@ def display_metadata(client, stream):
         song_now = status['song']
         if (song_now != song_name and
                 song_now is not None and song_now.strip() != ''):
-            if not showed_song and COMPACT_TITLES:
-                print("\033[A", end='')
+            if COMPACT_TITLES:
                 if not showed_name:
                     print("\033[A", end='')
+                if not showed_song:
+                    print("\033[A", end='')
                 showed_song = True
-            if COMPACT_TITLES and song_len > 0:
-                del_prompt(song_len)
+                if song_len > 0:
+                    del_prompt(song_len)
             song_len = print_blockify(
                 THEME['meta_prefix_str'], THEME['meta_prefix'],
                 song_now, THEME['meta_song_name'],
