@@ -226,6 +226,7 @@ class Server(object):
 
 class Client(object):
     """Importable Python object to wrap REST calls"""
+    version = 'v1.1'
     def __init__(self, addr=None):
         self.host = '127.0.0.1'
         self.port = PORT
@@ -233,7 +234,8 @@ class Client(object):
             (self.host, self.port) = addr
 
     def url(self, endpoint):
-        return 'http://%s:%s/api/v1.1/%s' % (self.host, self.port, endpoint)
+        return ('http://%s:%s/api/%s/%s' %
+                (self.host, self.port, self.version, endpoint))
 
     def get(self, endpoint):
         try:
@@ -247,11 +249,33 @@ class Client(object):
             raise ApiConnError(e)
         return resp_val
 
-    # TODO put, delete
-
     def post(self, endpoint, data={}):
         try:
             resp = requests.post(self.url(endpoint), data=json.dumps(data))
+        except requests.ConnectionError as e:
+            raise ApiConnError(e)
+        try:
+            resp_val = json.loads(resp.text)
+        except ValueError as e:
+            # remote server fails and kills connection or returns nothing
+            raise ApiConnError(e)
+        return resp_val
+
+    def put(self, endpoint, data={}):
+        try:
+            resp = requests.put(self.url(endpoint), data=json.dumps(data))
+        except requests.ConnectionError as e:
+            raise ApiConnError(e)
+        try:
+            resp_val = json.loads(resp.text)
+        except ValueError as e:
+            # remote server fails and kills connection or returns nothing
+            raise ApiConnError(e)
+        return resp_val
+
+    def delete(self, endpoint):
+        try:
+            resp = requests.delete(self.url(endpoint))
         except requests.ConnectionError as e:
             raise ApiConnError(e)
         try:
@@ -299,14 +323,6 @@ class Client(object):
             print('API request failure: %s' % rjson)
             return []
         return rjson['resp']['streams']
-
-    # def set(self, station, stream):
-    #     raise Exception('Deprecated')
-    #     # rjson = self.post('%s/%s' % (station, stream))
-    #     # if rjson is None or not rjson['success']:
-    #     #     print('API request failure: %s' % rjson)
-    #     #     return False
-    #     # return True
 
     def play(self, station_stream=None):
         url = 'player'
