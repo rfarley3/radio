@@ -44,10 +44,17 @@ function doAjax(uri, method, data) {
                 </div>
             </nav>
             <div class="jumbotron">
-                <h3><div id="status-currently-streaming"></div></h3>
-                <h3><div id="status-station"></div></h3>
-                <h3><div id="status-stream"></div></h3>
-                <h3><div id="status-song"></div></h3>
+                <div id="status">
+                    <h3><div id="status-currently-streaming"></div></h3>
+                    <!-- <h3><div id="status-station"></div></h3> -->
+                    <h3><div id="status-stream"></div></h3>
+                    <h3><div id="status-song"></div></h3>
+                </div>
+                <div id="ctrl" class="hidden">
+                    <button type="button" class="btn btn-primary" onclick="resume()">Play</button>
+                    <button type="button" class="btn btn-primary" onclick="pause()">Pause</button>
+                    <button type="button" class="btn btn-primary" onclick="stop()">Stop</button>
+                </div>
             </div>
             <div class="jumbotron">
                 <h3><div class="panel-group" id="stations-list"></div></h3>
@@ -64,14 +71,19 @@ function getStatus() {
         // console.log("Query response obj: " + JSON.stringify(data.resp));
         if (!data.resp.currently_streaming) {
             console.log("Not currently streaming");
-            $('#status-currently-streaming').text("Player is not currently streaming");
+            $('#status-currently-streaming').text("Player not active, click a stream below");
+            // $('#status-station').text('');
+            $('#status-stream').text('');
+            $('#status-song').text('');
+            $('#ctrl').addClass('hidden');
         }
         else {
             // console.log("Currently streaming: resp " + data.resp.station + " " + data.resp.stream);
-            $('#status-currently-streaming').text('Player is streaming');
-            $('#status-station').text(data.resp.station);
+            $('#status-currently-streaming').text('');
+            // $('#status-station').text(data.resp.station);
             $('#status-stream').text(data.resp.stream);
             $('#status-song').text(data.resp.song);
+            $('#ctrl').removeClass('hidden');
         }
     });
 };  // end getStatus
@@ -118,16 +130,49 @@ function play(station, stream) {
     });
 };  // end play
 
-// put('/api/v1.1/player')(self.pause)
-// post('/api/v1.1/player')(self.play)
+
 // delete('/api/v1.1/player')(self.stop)
+function stop() {
+    doAjax(uri_player, 'DELETE').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        console.log("Query response obj: " + JSON.stringify(data.resp));
+    });
+};  // end stop
+
+
+// put('/api/v1.1/player')(self.pause)
+function pause() {
+    doAjax(uri_player, 'PUT').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        console.log("Query response obj: " + JSON.stringify(data.resp));
+    });
+};  // end pause
+
+
+// post('/api/v1.1/player')(self.play)
+function resume() {
+    doAjax(uri_player, 'POST').done(function(data) {
+        if (!data.success) {
+            console.log("request failure, response: " + JSON.stringify(data.resp));
+            return;
+        }
+        console.log("Query response obj: " + JSON.stringify(data.resp));
+    });
+};  // end resume
+
 
 // $(document).ready
 $(function() {
-    // setInterval(function() {
-    //     getStatus();
-    // }, 1000);
-    getStatus();
+    setInterval(function() {
+        getStatus();
+    }, 1000);
+    // getStatus();
     getStations();
 });
         </script>
