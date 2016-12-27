@@ -5,7 +5,7 @@ if platform.python_version().startswith('3'):
     PY3 = True
 import json
 import requests
-from bottle import run, route, post, request
+from bottle import run, route, post, put, delete, request
 if PY3:
     from urllib.parse import unquote
 else:
@@ -58,6 +58,19 @@ class Server(object):
         route('/api/v1/play')(self.play)
         route('/api/v1/pause')(self.pause)
         route('/api/v1/stop')(self.stop)
+
+        route('/api/v1.1/stations')(self.stations)  # incl streams w/ station data
+        route('/api/v1.1/stations/<station>')(self.station) # incl streams w/ station data
+        route('/api/v1.1/stations/<station>/streams')(self.streams)
+        route('/api/v1.1/stations/<station>/streams/<stream>')(self.stream)
+        route('/api/v1.1/streams')(self.streams)
+        route('/api/v1.1/streams/<station>')(self.streams)
+        route('/api/v1.1/streams/<station>/<stream>')(self.stream)
+        route('/api/v1.1/player')(self.status)
+        post('/api/v1.1/player')(self.play)
+        post('/api/v1.1/player/<station>/<stream>')(self.play)
+        put('/api/v1.1/player')(self.pause)
+        delete('/api/v1.1/player')(self.stop)
         run(host=self.host, port=self.port, debug=BOTTLE_DEBUG, quiet=True)
 
     # TODO load a js frontend
@@ -173,13 +186,29 @@ class Server(object):
         resp = 'Setting active stream to %s %s' % (station, stream)
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
-    def play(self):
+    def play(self, station=None, stream=None):
+        # Any conditions when auto-stop make sense?
+        if self.radio.is_playing and not self.radio.is_paused:
+            success = False
+            resp = 'Failure: stop/pause before playing'
+            return json.dumps({'success': success, 'resp': resp}) + '\n'
+        if station is not None:
+            station = unquote(station)
+        if stream is not None:
+            stream = unquote(stream)
+        if (station is not None and stream is not None and
+                (self.radio.station != station or
+                 self.radio.stream != stream)):
+            if not self.radio.set(station, stream):
+                success = False
+                resp = 'Failure: could not set the station/stream'
+                return json.dumps({'success': success, 'resp': resp}) + '\n'
         (station, stream) = self.radio.play()
         success = True
         resp = 'Playing %s %s' % (station, stream)
         if station is None or stream is None:
             success = False
-            resp = 'Failure: set first, or stop any currently playing'
+            resp = 'Failure: could not play'
         return json.dumps({'success': success, 'resp': resp}) + '\n'
 
     def pause(self):
@@ -197,6 +226,7 @@ class Server(object):
 
 class Client(object):
     """Importable Python object to wrap REST calls"""
+    version = 'v1.1'
     def __init__(self, addr=None):
         self.host = '127.0.0.1'
         self.port = PORT
@@ -204,7 +234,8 @@ class Client(object):
             (self.host, self.port) = addr
 
     def url(self, endpoint):
-        return 'http://%s:%s/api/v1/%s' % (self.host, self.port, endpoint)
+        return ('http://%s:%s/api/%s/%s' %
+                (self.host, self.port, self.version, endpoint))
 
     def get(self, endpoint):
         try:
@@ -230,15 +261,39 @@ class Client(object):
             raise ApiConnError(e)
         return resp_val
 
+    def put(self, endpoint, data={}):
+        try:
+            resp = requests.put(self.url(endpoint), data=json.dumps(data))
+        except requests.ConnectionError as e:
+            raise ApiConnError(e)
+        try:
+            resp_val = json.loads(resp.text)
+        except ValueError as e:
+            # remote server fails and kills connection or returns nothing
+            raise ApiConnError(e)
+        return resp_val
+
+    def delete(self, endpoint):
+        try:
+            resp = requests.delete(self.url(endpoint))
+        except requests.ConnectionError as e:
+            raise ApiConnError(e)
+        try:
+            resp_val = json.loads(resp.text)
+        except ValueError as e:
+            # remote server fails and kills connection or returns nothing
+            raise ApiConnError(e)
+        return resp_val
+
     def status(self, station=None):
-        rjson = self.get('status')
+        rjson = self.get('player')
         if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return None
         return rjson['resp']
 
     def station(self, station):
-        rjson = self.get('%s' % station)
+        rjson = self.get('stations/%s' % station)
         if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return None
@@ -252,7 +307,8 @@ class Client(object):
         return rjson['resp']['stations']
 
     def stream(self, station, stream):
-        rjson = self.get('%s/%s' % (station, stream))
+        rjson = self.get('stations/%s/streams/%s' % (station, stream))
+        # aso streams/<station>/<stream>
         if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return None
@@ -262,39 +318,31 @@ class Client(object):
         if station is None:
             rjson = self.get('streams')
         else:
-            rjson = self.get('%s/streams' % station)
+            rjson = self.get('stations/%s/streams' % station)
         if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return []
         return rjson['resp']['streams']
 
-    def set(self, station, stream):
-        rjson = self.post('%s/%s' % (station, stream))
-        if rjson is None or not rjson['success']:
-            print('API request failure: %s' % rjson)
-            return False
-        return True
-
-    def play(self, station_stream=None):
-        if station_stream is not None:
-            station, stream = station_stream
-            self.set(station, stream)
-            # TODO error check
-        rjson = self.get('play')
+    def play(self, station=None, stream=None):
+        url = 'player'
+        if station is not None and stream is not None:
+            url = 'player/%s/%s' % (station, stream)
+        rjson = self.post(url)
         if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
         return True
 
     def pause(self):
-        rjson = self.get('pause')
+        rjson = self.put('player')
         if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return False
         return True
 
     def stop(self):
-        rjson = self.get('stop')
+        rjson = self.delete('player')
         if rjson is None or not rjson['success']:
             print('API request failure: %s' % rjson)
             return False

@@ -273,51 +273,34 @@ def test_api_client():  # noqa
     if len(r) == 0:
         print('%02d>>> Failed' % i)
         sys.exit(1)
+    print('%02d>>> c.streams' % i)
     r = c.streams()
     # print('%02d>>> c.streams:%s' % (i, r))
     i += 1
     if len(r) == 0:
         print('%02d>>> Failed' % i)
         sys.exit(1)
+    print('%02d>>> c.streams(favs):' % i)
     r = c.streams('favs')
-    # print('%02d>>> c.streams(favs):%s' % (i, r))
     i += 1
     if len(r) == 0:
         print('%02d>>> Failed' % i)
         sys.exit(1)
+    print('%02d>>> c.streams(ewqrewrwer):' % i)
     r = c.streams('ewqrewrwer')
-    print('%02d>>> c.streams(ewqrewrwer):%s' % (i, r))
     i += 1
     if len(r) != 0:
         print('%02d>>> Failed' % i)
         sys.exit(1)
-    # Set currently requires both when called from client API
-    # r = c.set('favs')
-    # print('%02d>>> c.set(favs):%s' % (i, r))
-    # i += 1
-    # if not r:
-    #     print('%02d>>> Failed' % i)
-    #     sys.exit(1)
-    # r = c.set('ewqrewrwer')
-    # print('%02d>>> c.set(ewqrewrwer):%s' % (i, r))
-    # i += 1
-    # if r:
-    #     print('%02d>>> Failed' % i)
-    #     sys.exit(1)
-    r = c.set('favs', 'ewqrewrwer')
-    print('%02d>>> c.set(favs,ewqrewrwer):%s' % (i, r))
+    print('%02d>>> c.play(favs,ewqrewrwer)' % i)
+    r = c.play('favs', 'ewqrewrwer')
+    # print('%02d>>> c.play(favs,ewqrewrwer):%s' % (i, r))
     i += 1
     if r:
         print('%02d>>> Failed' % i)
         sys.exit(1)
-    r = c.set('favs', 'BAGeL Radio')
-    print('%02d>>> c.set(favs,BAGeL Radio):%s' % (i, r))
-    i += 1
-    if not r:
-        print('%02d>>> Failed' % i)
-        sys.exit(1)
-    r = c.play()
-    print('%02d>>> c.play:%s' % (i, r))
+    r = c.play('favs', 'BAGeL Radio')
+    print('%02d>>> c.play(favs,BAGeL Radio):%s' % (i, r))
     i += 1
     if not r:
         print('%02d>>> Failed' % i)
@@ -336,8 +319,8 @@ def test_api_client():  # noqa
         print('%02d>>> Failed' % i)
         sys.exit(1)
     sleep(2)
-    r = c.play(('favs', 'WCPE Classical'))
-    print('%02d>>> c.play((favs,WCPE Classical)):%s' % (i, r))
+    r = c.play('favs', 'WCPE Classical')
+    print('%02d>>> c.play(favs,WCPE Classical):%s' % (i, r))
     i += 1
     if not r:
         print('%02d>>> Failed' % i)
@@ -350,7 +333,7 @@ def test_api_client():  # noqa
         print('%02d>>> Failed' % i)
         sys.exit(1)
     r = c.stop()
-    print('%02d>>> c.stations(station):%s' % (i, r))
+    print('%02d>>> c.stop():%s' % (i, r))
     i += 1
     if not r:
         print('%02d>>> Failed' % i)
