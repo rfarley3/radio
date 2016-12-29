@@ -102,9 +102,9 @@ class Soma(Station):
     ui_name = 'SomaFM'
 
     def __init__(self):
-        super(Soma, self).__init__(name='soma', rebuild=True)
         self.parse_url = "http://somafm.com"
         self.stream_url_base = "http://ice.somafm.com/"
+        super(Soma, self).__init__(name='soma', rebuild=True)
 
     def build_file(self):
         # Scrapes channels from somafm.com
